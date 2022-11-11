@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>hello-akka-java</groupId>
-    <artifactId>app</artifactId>
+    <artifactId>AkkaNSDS</artifactId>
     <version>1.0</version>
 
     <properties>
