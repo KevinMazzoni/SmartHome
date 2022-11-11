@@ -14,7 +14,7 @@ public class CounterSupervisorActor extends AbstractActor {
         new OneForOneStrategy(
             1, // Max no of retries
             Duration.ofMinutes(1), // Within what time period
-            DeciderBuilder.match(Exception.class, e -> SupervisorStrategy.stop())
+            DeciderBuilder.match(Exception.class, e -> SupervisorStrategy.restart())
                 .build());
 
     @Override
