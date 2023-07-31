@@ -22,6 +22,7 @@ public class Counter {
 
 		for (int i = 0; i < numMessages; i++) {
 			exec.submit(() -> counter.tell(new SimpleMessage(), ActorRef.noSender()));
+			exec.submit(() -> counter.tell(new OtherMessage(), ActorRef.noSender()));
 		}
 		
 		// Wait for all messages to be sent and received
