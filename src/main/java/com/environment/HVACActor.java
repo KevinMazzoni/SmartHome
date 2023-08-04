@@ -7,10 +7,6 @@ import akka.actor.Props;
 
 public class HVACActor extends AbstractActor {
 
-	public static final int INFO_MSG = 0;
-	public static final int SET_MSG = 1;
-	public static final int FAULT = -1;
-
 	private double temperature;
 
 	public HVACActor() {
@@ -23,9 +19,22 @@ public class HVACActor extends AbstractActor {
 	}
 
 	void onTemperatureMessage(TemperatureMessage msg) throws Exception {
-		if (msg.getType() == CounterSupervisor.SET_MSG){
-			System.out.println("I'm setting the temperature to " + msg.getTemperature() + " degrees.");
-			this.temperature = msg.getTemperature();
+		
+		switch(msg.getType()){
+			case ControlPanel.SET_MSG:
+				System.out.println("I'm setting the temperature to " + msg.getTemperature() + " degrees.");
+				this.temperature = msg.getTemperature();
+				break;
+			case ControlPanel.INFO_MSG:
+				System.out.println("I received an INFO_MSG, type: " + msg.getType() + " temperature: " + msg.getTemperature());
+				break;
+			case ControlPanel.FAULT:
+				System.out.println("Received a fault.");
+				break;
+			default:
+				System.out.println("Message received is not valid");
+				break;
+			
 		}
 	}
 
@@ -40,7 +49,7 @@ public class HVACActor extends AbstractActor {
 	}
 	
 	static Props props() {
-		return Props.create(CounterActor.class);
+		return Props.create(HVACActor.class);
 	}
 
 }

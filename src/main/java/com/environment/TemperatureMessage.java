@@ -13,8 +13,13 @@ public class TemperatureMessage {
 		return messageType;
 	}
 
-	public TemperatureMessage(double temperature, int messageType) {
+	public TemperatureMessage(int messageType, double temperature) {
 		this.temperature = temperature;
+		this.messageType = messageType;
+	}
+
+	public TemperatureMessage(int messageType) {
+		this.temperature = 0;
 		this.messageType = messageType;
 	}
 	

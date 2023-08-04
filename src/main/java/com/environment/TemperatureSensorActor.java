@@ -3,18 +3,27 @@ package com.environment;
 import java.util.Optional;
 
 import akka.actor.AbstractActor;
+import akka.actor.ActorRef;
 import akka.actor.Props;
 
 public class TemperatureSensorActor extends AbstractActor {
 
-	public static final int INFO_MSG = 0;
-	public static final int SET_MSG = 1;
-	public static final int FAULT = -1;
-
 	private double temperature;
 
 	public TemperatureSensorActor() {
-		this.temperature = 0;
+		
+		// final ActorRef supervisor = sys.actorOf(CounterSupervisorActor.props(), "supervisor");
+		
+		// this.temperature = 0;
+
+		// while(true){
+		// 	try {
+		// 		Thread.sleep(1000, 0);
+
+		// 	} catch (Exception e) {
+		// 		// TODO: handle exception
+		// 	}
+		// }
 	}
 
 	@Override
@@ -23,9 +32,10 @@ public class TemperatureSensorActor extends AbstractActor {
 	}
 
 	void onTemperatureMessage(TemperatureMessage msg) throws Exception {
-		if (msg.getType() == CounterSupervisor.INFO_MSG){
+		if (msg.getType() == ControlPanel.INFO_MSG){
 			System.out.println("I'm sending back the temperature");
 			this.temperature = msg.getTemperature();
+			
 		}
 	}
 
@@ -40,7 +50,7 @@ public class TemperatureSensorActor extends AbstractActor {
 	}
 	
 	static Props props() {
-		return Props.create(CounterActor.class);
+		return Props.create(TemperatureSensorActor.class);
 	}
 
 }
