@@ -27,6 +27,7 @@ public class HVACActor extends AbstractActor {
 				break;
 			case ControlPanel.INFO_MSG:
 				System.out.println("I received an INFO_MSG, type: " + msg.getType() + " temperature: " + msg.getTemperature());
+				getSender().tell(new TemperatureMessage(0, 1), getSelf());
 				break;
 			case ControlPanel.FAULT:
 				System.out.println("Received a fault.");
