@@ -33,49 +33,55 @@ public class ControlPanel {
 		// final ActorRef TemperatureSensorActor = sys.actorOf(TemperatureSensorActor.props(), "HVAC");
 		// HVAC ! Message("Hello from actor A");
 
-		ActorRef counter, HVAC, temperatureSensor;
+		ActorRef HVAC, temperatureSensor;
 		Scanner scanner = new Scanner(System.in);
 		int choice;
+		boolean toContinue = true;
 
-		System.out.println("\n");
-		System.out.println("**********************************************************************");
-		System.out.println("******************************SMART HOME******************************");
-		System.out.println();
-		System.out.println("Choose the no. of appliance you want to check or set, and click enter:");
-		System.out.println("1 -> HVAC system");
-		System.out.println("2 -> kitchen machine");
-		System.out.println("3 -> infotainment");
-		System.out.println();
-		System.out.println("**********************************************************************");
+		while(toContinue){
+			System.out.println("\n");
+			System.out.println("**********************************************************************");
+			System.out.println("******************************SMART HOME******************************");
+			System.out.println();
+			System.out.println("Choose the no. of appliance you want to check or set, and click enter:");
+			System.out.println("1 -> HVAC system");
+			System.out.println("2 -> kitchen machine");
+			System.out.println("3 -> infotainment");
+			System.out.println();
+			System.out.println("**********************************************************************");
 
-		choice = scanner.nextInt();
+			choice = scanner.nextInt();
 
-		System.out.println("You chose: " + choice);
+			System.out.println("You chose: " + choice);
 
-		scanner.close();
-		
-		try {
+			// scanner.close();
 			
-			// Asks the supervisor to create the child actor and returns a reference
-			scala.concurrent.Future<Object> waitingForHVAC = ask(supervisor, Props.create(HVACActor.class), 5000);
-			scala.concurrent.Future<Object> waitingForTemperatureSensor = ask(supervisor, Props.create(TemperatureSensorActor.class), 5000);
-			HVAC = (ActorRef) waitingForHVAC.result(timeout, null);
-			temperatureSensor = (ActorRef) waitingForTemperatureSensor.result(timeout, null);
+			try {
+				
+				// Asks the supervisor to create the child actor and returns a reference
+				scala.concurrent.Future<Object> waitingForHVAC = ask(supervisor, Props.create(HVACActor.class), 5000);
+				scala.concurrent.Future<Object> waitingForTemperatureSensor = ask(supervisor, Props.create(TemperatureSensorActor.class), 5000);
+				HVAC = (ActorRef) waitingForHVAC.result(timeout, null);
+				temperatureSensor = (ActorRef) waitingForTemperatureSensor.result(timeout, null);
 
-			HVAC.tell(new TemperatureMessage(INFO_MSG), temperatureSensor);
+				HVAC.tell(new TemperatureMessage(INFO_MSG), temperatureSensor);
 
-			// for (int i = 0; i < FAULTS; i++)
-			// 	counter.tell(new DataMessage(FAULT_OP), ActorRef.noSender());
+				// for (int i = 0; i < FAULTS; i++)
+				// 	counter.tell(new DataMessage(FAULT_OP), ActorRef.noSender());
 
-			HVAC.tell(new TemperatureMessage(INFO_MSG), ActorRef.noSender());
+				HVAC.tell(new TemperatureMessage(INFO_MSG), ActorRef.noSender());
 
-			sys.terminate();
+				System.out.println("Do you want to proceed with another appliance? Insert 0 to terminate, 1 to continue");
+				scanner.nextInt(choice);
+				toContinue = (choice == 1) ? true : false;
 
-		} catch (TimeoutException | InterruptedException e1) {
-		
-			e1.printStackTrace();
+			} catch (TimeoutException | InterruptedException e1) {
+				e1.printStackTrace();
+			}
 		}
 
+		scanner.close();
+		sys.terminate();
 	}
 
 }
