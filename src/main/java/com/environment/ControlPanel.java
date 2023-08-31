@@ -4,6 +4,7 @@ import static akka.pattern.Patterns.ask;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import akka.actor.ActorRef;
@@ -71,8 +72,9 @@ public class ControlPanel {
 
 				HVAC.tell(new TemperatureMessage(INFO_MSG), ActorRef.noSender());
 
+				TimeUnit.SECONDS.sleep(1);
 				System.out.println("Do you want to proceed with another appliance? Insert 0 to terminate, 1 to continue");
-				scanner.nextInt(choice);
+				choice = scanner.nextInt();
 				toContinue = (choice == 1) ? true : false;
 
 			} catch (TimeoutException | InterruptedException e1) {
