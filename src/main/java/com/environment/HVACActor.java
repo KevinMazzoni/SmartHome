@@ -29,6 +29,11 @@ public class HVACActor extends AbstractActor {
 				System.out.println("I received an INFO_MSG, type: " + msg.getType() + " temperature: " + msg.getTemperature());
 				getSender().tell(new TemperatureMessage(0, 1), getSelf());
 				break;
+			case ControlPanel.INFO_CONSUMPTION:
+				System.out.println("I received an INFO_CONSUMPTION message, type: " + msg.getType() + " temperature: " + msg.getTemperature());
+				System.out.println("Instantaneous energy consumption: " + Math.random()*1000 + " kW");
+				getSender().tell(new TemperatureMessage(0, 1), getSelf());
+				break;
 			case ControlPanel.FAULT:
 				System.out.println("Received a fault.");
 				break;

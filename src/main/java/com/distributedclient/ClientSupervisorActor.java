@@ -1,20 +1,21 @@
-package com.environment;
+package com.distributedclient;
+
+import java.time.Duration;
 
 import akka.actor.AbstractActor;
 import akka.actor.OneForOneStrategy;
 import akka.actor.Props;
 import akka.actor.SupervisorStrategy;
 import akka.japi.pf.DeciderBuilder;
-import java.time.Duration;
 
-public class KitchenActor extends AbstractActor {
+public class ClientSupervisorActor extends AbstractActor {
 
-	 // #strategy
+	// #strategy
     private static SupervisorStrategy strategy =
         new OneForOneStrategy(
             1, // Max no of retries
             Duration.ofMinutes(1), // Within what time period
-            DeciderBuilder.match(Exception.class, e -> SupervisorStrategy.resume())
+            DeciderBuilder.match(Exception.class, e -> SupervisorStrategy.restart())
                 .build());
 
     @Override
@@ -22,7 +23,7 @@ public class KitchenActor extends AbstractActor {
       return strategy;
     }
 
-	public KitchenActor() {
+	public ClientSupervisorActor() {
 	}
 
 	@Override
@@ -38,7 +39,7 @@ public class KitchenActor extends AbstractActor {
 	}
 
 	static Props props() {
-		return Props.create(KitchenActor.class);
+		return Props.create(ClientSupervisorActor.class);
 	}
 
 }

@@ -33,8 +33,9 @@ public class TemperatureSensorActor extends AbstractActor {
 
 	void onTemperatureMessage(TemperatureMessage msg) throws Exception {
 		if (msg.getType() == ControlPanel.INFO_MSG){
+			this.temperature = ((Math.random()*100)%50);
 			System.out.println("I'm sending back the temperature");
-			this.temperature = msg.getTemperature();
+			// this.temperature = msg.getTemperature();
 			System.out.println("Telling the temperature from TemperatureSensorActor, temperature is: " + this.temperature);
 		}
 	}
