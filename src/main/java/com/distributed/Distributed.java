@@ -16,8 +16,8 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 public class Distributed {
 
 	public static void main(String[] args){
-		Config conf = ConfigFactory.parseFile(new File("conf"));
-		ActorSystem sys = ActorSystem.create("Server", conf);
+		Config serverConfig = ConfigFactory.parseFile(new File("conf"));
+		ActorSystem sys = ActorSystem.create("Server", serverConfig);
 		ActorRef supervisor = sys.actorOf(ServerActor.props(), "ServerActor");
 
 		scala.concurrent.duration.Duration timeout = scala.concurrent.duration.Duration.create(5, SECONDS);
@@ -31,6 +31,5 @@ public class Distributed {
 			e.printStackTrace();
 		}
 	}
-
 
 }

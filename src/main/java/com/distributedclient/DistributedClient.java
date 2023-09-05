@@ -1,7 +1,11 @@
 package com.distributedclient;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
+
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
@@ -14,7 +18,9 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 public class DistributedClient{
 
 	public static void main(String[] args){
-		ActorSystem sys = ActorSystem.create("Client");
+
+		Config clientConfig = ConfigFactory.parseFile(new File("client-conf"));
+		ActorSystem sys = ActorSystem.create("Client", clientConfig);
 		ActorRef supervisor = sys.actorOf(ClientSupervisorActor.props(), "ClientSupervisorActor");
 
 		scala.concurrent.duration.Duration timeout = scala.concurrent.duration.Duration.create(5, SECONDS);

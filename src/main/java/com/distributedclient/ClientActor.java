@@ -1,6 +1,7 @@
 package com.distributedclient;
 
 import akka.actor.AbstractActor;
+import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
 
@@ -19,7 +20,7 @@ public class ClientActor extends AbstractActor {
 		System.out.println("Ho ricevuto un SimpleMessage");
 		System.out.println("L'indirizzo del server è: " + msg.getServerAddr());
 		// ActorSelection server = getContext().actorSelection(msg.getServerAddr());
-		// server.tell(msg, getSender());
+		// server.tell(new SimpleMessage(msg.getServerAddr()), ActorRef.noSender());
 	}
 	
 	void onOtherMessage(OtherMessage msg) {
