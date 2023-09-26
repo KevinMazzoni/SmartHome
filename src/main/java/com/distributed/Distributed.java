@@ -16,9 +16,12 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 public class Distributed {
 
 	public static void main(String[] args){
-		Config serverConfig = ConfigFactory.parseFile(new File("conf"));
-		ActorSystem sys = ActorSystem.create("Server", serverConfig);
-		ActorRef supervisor = sys.actorOf(ServerActor.props(), "ServerActor");
+		// Config serverConfig = ConfigFactory.parseFile(new File("conf"));
+		Config customConfig = ConfigFactory.load("serverconf.conf");
+		ActorSystem sys = ActorSystem.create("Server", customConfig);
+		
+		// ActorRef supervisor = sys.actorOf(ServerActor.props(), "ServerActor");
+		ActorRef supervisor = sys.actorOf(Props.create(ServerActor.class), "ServerActor");
 
 		scala.concurrent.duration.Duration timeout = scala.concurrent.duration.Duration.create(5, SECONDS);
 		scala.concurrent.Future<Object> waitingForControlPanel = ask(supervisor, Props.create(ControlPanelActor.class), 5000);

@@ -19,7 +19,7 @@ public class DistributedClient{
 
 	public static void main(String[] args){
 
-		Config clientConfig = ConfigFactory.parseFile(new File("client-conf"));
+		Config clientConfig = ConfigFactory.parseFile(new File("clientconf.txt"));
 		ActorSystem sys = ActorSystem.create("Client", clientConfig);
 		ActorRef supervisor = sys.actorOf(ClientSupervisorActor.props(), "ClientSupervisorActor");
 
