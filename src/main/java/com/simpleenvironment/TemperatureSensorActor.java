@@ -42,7 +42,7 @@ public class TemperatureSensorActor extends AbstractActor {
         System.out.println("PORTA DEL TEMPERATURE SENSOR: " + System.getenv("PORT"));
 
         // Crea un riferimento all'attore del server
-        ActorSelection serverActor = system.actorSelection("akka://ServerSystem@127.0.0.1:2551/user/ServerActor");
+        ActorSelection serverActor = system.actorSelection("akka://ServerSystem@127.0.0.1:2551/user/ControlPanelActor");
 
         // Crea e avvia l'attore del client, passando il riferimento all'attore del server
         system.actorOf(TemperatureSensorActor.props(serverActor), "temperatureSensorActor");
@@ -55,7 +55,8 @@ public class TemperatureSensorActor extends AbstractActor {
                 Duration.Zero(), // Ritardo prima dell'esecuzione (0 indica che inizia immediatamente)
                 Duration.create(1, TimeUnit.SECONDS), // Intervallo tra gli invii dei messaggi
                 () -> serverActor.tell("Temperatura: 25°C", ActorRef.noSender()), // Azione da eseguire
-                system.dispatcher());
+                system.dispatcher()
+        );
 
         //Una prova
         // scala.concurrent.Future<Object> waitingForTemperatureSensor = ask(serverActor, Props.create(TemperatureSensorActor.class), 5000);
