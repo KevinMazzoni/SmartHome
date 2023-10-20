@@ -37,7 +37,13 @@ public class TemperatureSensorActor extends AbstractActor {
     public static void main(String[] args) {
         ActorRef temperatureSensor;
         Config config = ConfigFactory.load();
+
+        //Vorrei fare così ma da' un errore non bloccante
+        // ActorSystem system = ActorSystem.create("KitchenSystem", config);
+        
+        //Quindi faccio così
         ActorSystem system = ActorSystem.create("ServerSystem", config);
+        
 
         System.out.println("PORTA DEL TEMPERATURE SENSOR: " + System.getenv("PORT"));
 
