@@ -10,6 +10,8 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
+
+import java.util.Scanner;
 import java.util.concurrent.TimeoutException;
 
 public class ControlPanel {
@@ -49,6 +51,15 @@ public class ControlPanel {
         }
 
         System.out.println("Il ServerActor ha terminato di eseguire il main");
+
+        showCli();
+    }
+
+    private static void showCli() {
+        System.out.println("Scegli la stanza: \n1. Cucina\n2. Salotto\n3. Camera da letto");
+        Scanner scanner = new Scanner(System.in);
+        int choice = scanner.nextInt();
+        System.out.println("Scelta effettuata: " + choice);
     }
 
     static Props props() {

@@ -13,10 +13,10 @@ import scala.concurrent.duration.Duration;
 
 import java.util.concurrent.TimeUnit;
 
-public class TemperatureSensorActor extends AbstractActor {
+public class TemperatureSensorActor2 extends AbstractActor {
     private final ActorSelection serverActor;
 
-    public TemperatureSensorActor(ActorSelection serverActor) {
+    public TemperatureSensorActor2(ActorSelection serverActor) {
         this.serverActor = serverActor;
     }
 
@@ -55,7 +55,7 @@ public class TemperatureSensorActor extends AbstractActor {
         system.scheduler().scheduleWithFixedDelay(
                 Duration.Zero(), // Ritardo prima dell'esecuzione (0 indica che inizia immediatamente)
                 Duration.create(1, TimeUnit.SECONDS), // Intervallo tra gli invii dei messaggi
-                () -> serverActor.tell(new TemperatureMessage(0), ActorRef.noSender()), // Azione da eseguire
+                () -> serverActor.tell("25.0 in stanza 2", ActorRef.noSender()), // Azione da eseguire
                 system.dispatcher()
         );
 
