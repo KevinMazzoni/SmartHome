@@ -3,6 +3,7 @@ package com.simpleenvironment;
 import static akka.pattern.Patterns.ask;
 
 import akka.actor.ActorRef;
+import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 
@@ -52,7 +53,11 @@ public class ControlPanel {
 
         System.out.println("Il ServerActor ha terminato di eseguire il main");
 
-        showCli();
+        // showCli();
+
+        ActorSelection temperatureSensorActor2 = system.actorSelection("akka://ServerSystem@127.0.0.1:2553/user/TemperatureSensorActor2");
+
+        temperatureSensorActor2.tell(new SimpleMessage("Prova invio SimpleMessage da ControlPanel a TemperatureSensorActor2", Type.INFO), ActorRef.noSender());
     }
 
     private static void showCli() {
@@ -60,6 +65,7 @@ public class ControlPanel {
         Scanner scanner = new Scanner(System.in);
         int choice = scanner.nextInt();
         System.out.println("Scelta effettuata: " + choice);
+
     }
 
     static Props props() {

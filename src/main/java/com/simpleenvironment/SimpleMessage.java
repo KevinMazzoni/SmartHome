@@ -1,9 +1,26 @@
 package com.simpleenvironment;
 
-public class SimpleMessage {
-    public String message;
+import java.io.Serializable;
 
-    public SimpleMessage(String message){
+public class SimpleMessage implements Serializable {
+    
+    private String message;
+    private Type type;
+
+    public SimpleMessage(String message, Type type){
         this.message = message;
+        this.type = type;
+    }
+
+    public String getMessage(){
+        return this.message;
+    }
+
+    public void setMessage(String message){
+        this.message = message;
+    }
+
+    public Type getType(){
+        return this.type;
     }
 }

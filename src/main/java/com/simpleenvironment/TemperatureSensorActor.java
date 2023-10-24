@@ -1,4 +1,3 @@
-//File ClientActor.java
 package com.simpleenvironment;
 
 import akka.actor.AbstractActor;
