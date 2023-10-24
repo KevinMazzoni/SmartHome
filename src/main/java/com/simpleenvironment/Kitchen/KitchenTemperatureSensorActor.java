@@ -11,7 +11,8 @@ import java.util.Optional;
 
 public class KitchenTemperatureSensorActor extends AbstractActor {
 
-    public KitchenTemperatureSensorActor() {
+    public KitchenTemperatureSensorActor(String string) {
+        System.out.println("Questa è la stringa che mi è arrivata in fase di costruzione: " + string);
     }
 
     @Override

@@ -55,11 +55,13 @@ public class ControlPanel {
 
         System.out.println("Il ServerActor ha terminato di eseguire il main");
 
-        // showCli();
+        showCli();
 
         ActorSelection kitchenSupervisorActor = system.actorSelection("akka://ServerSystem@127.0.0.1:2553/user/KitchenSupervisorActor");
 
-        kitchenSupervisorActor.tell(new SimpleMessage("Prova invio SimpleMessage da ControlPanel a kitchenSupervisorActor", Type.INFO), ActorRef.noSender());
+        kitchenSupervisorActor.tell(new SimpleMessage("Prova invio SimpleMessage da ControlPanel a KitchenSupervisorActor", Type.INFO), ActorRef.noSender());
+
+        kitchenSupervisorActor.tell(new SimpleMessage("Prova invio SimpleMessage di tipo INFO_TEMPERATURE dal ControlPanel a KitchenSupervisorActor", Type.INFO_TEMPERATURE), ActorRef.noSender());
     }
 
     private static void showCli() {
