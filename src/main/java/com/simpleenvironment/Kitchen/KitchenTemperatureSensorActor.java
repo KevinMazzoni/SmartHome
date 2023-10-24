@@ -1,5 +1,5 @@
 
-package com.simpleenvironment;
+package com.simpleenvironment.Kitchen;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
@@ -7,16 +7,17 @@ import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 
+import com.simpleenvironment.Messages.SimpleMessage;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import scala.concurrent.duration.Duration;
 
 import java.util.concurrent.TimeUnit;
 
-public class TemperatureSensorActor2 extends AbstractActor {
+public class KitchenTemperatureSensorActor extends AbstractActor {
     private final ActorSelection serverActor;
 
-    public TemperatureSensorActor2(ActorSelection serverActor) {
+    public KitchenTemperatureSensorActor(ActorSelection serverActor) {
         this.serverActor = serverActor;
     }
 
@@ -52,7 +53,7 @@ public class TemperatureSensorActor2 extends AbstractActor {
         ActorSelection controlPanelActor = system.actorSelection("akka://ServerSystem@127.0.0.1:2551/user/ControlPanelActor");
 
         // Crea e avvia l'attore del client, passando il riferimento all'attore del server
-        system.actorOf(TemperatureSensorActor2.props(controlPanelActor), "TemperatureSensorActor2");
+        system.actorOf(KitchenTemperatureSensorActor.props(controlPanelActor), "TemperatureSensorActor2");
 
         // Valido
         system.scheduler().scheduleWithFixedDelay(
@@ -65,6 +66,6 @@ public class TemperatureSensorActor2 extends AbstractActor {
     }
 
     public static Props props(ActorSelection serverActor) {
-        return Props.create(TemperatureSensorActor2.class, serverActor);
+        return Props.create(KitchenTemperatureSensorActor.class, serverActor);
     }
 }

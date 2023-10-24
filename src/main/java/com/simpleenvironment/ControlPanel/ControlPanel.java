@@ -1,4 +1,4 @@
-package com.simpleenvironment;
+package com.simpleenvironment.ControlPanel;
 
 import static akka.pattern.Patterns.ask;
 
@@ -7,6 +7,8 @@ import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 
+import com.simpleenvironment.Messages.SimpleMessage;
+import com.simpleenvironment.Messages.Type;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 

@@ -1,6 +1,8 @@
-package com.simpleenvironment;
+package com.simpleenvironment.ControlPanel;
 
 import java.time.Duration;
+
+import com.simpleenvironment.Messages.TemperatureMessage;
 
 import akka.actor.AbstractActor;
 import akka.actor.OneForOneStrategy;

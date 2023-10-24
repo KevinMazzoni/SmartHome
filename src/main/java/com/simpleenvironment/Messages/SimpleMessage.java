@@ -1,4 +1,4 @@
-package com.simpleenvironment;
+package com.simpleenvironment.Messages;
 
 import java.io.Serializable;
 

@@ -1,4 +1,4 @@
-package com.simpleenvironment;
+package com.simpleenvironment.ControlPanel;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
