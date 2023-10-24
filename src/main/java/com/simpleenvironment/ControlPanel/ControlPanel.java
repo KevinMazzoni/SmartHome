@@ -57,9 +57,9 @@ public class ControlPanel {
 
         // showCli();
 
-        ActorSelection temperatureSensorActor2 = system.actorSelection("akka://ServerSystem@127.0.0.1:2553/user/TemperatureSensorActor2");
+        ActorSelection kitchenSupervisorActor = system.actorSelection("akka://ServerSystem@127.0.0.1:2553/user/KitchenSupervisorActor");
 
-        temperatureSensorActor2.tell(new SimpleMessage("Prova invio SimpleMessage da ControlPanel a TemperatureSensorActor2", Type.INFO), ActorRef.noSender());
+        kitchenSupervisorActor.tell(new SimpleMessage("Prova invio SimpleMessage da ControlPanel a kitchenSupervisorActor", Type.INFO), ActorRef.noSender());
     }
 
     private static void showCli() {

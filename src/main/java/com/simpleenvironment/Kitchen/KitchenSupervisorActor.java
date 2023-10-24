@@ -1,4 +1,4 @@
-package com.simpleenvironment.ControlPanel;
+package com.simpleenvironment.Kitchen;
 
 import java.time.Duration;
 
@@ -11,7 +11,7 @@ import akka.actor.Props;
 import akka.actor.SupervisorStrategy;
 import akka.japi.pf.DeciderBuilder;
 
-public class ControlPanelActor extends AbstractActor {
+public class KitchenSupervisorActor extends AbstractActor {
 
      // #strategy
     private static SupervisorStrategy strategy =
@@ -26,7 +26,7 @@ public class ControlPanelActor extends AbstractActor {
       return strategy;
     }
 
-	public ControlPanelActor() {
+	public KitchenSupervisorActor() {
 	}
 
 	@Override
@@ -39,18 +39,18 @@ public class ControlPanelActor extends AbstractActor {
 		                	getSender().tell(getContext().actorOf(props), getSelf());
 		             	})
 					.match(TemperatureMessage.class, message -> {
-                    	System.out.println("ControlPanelActor ha ricevuto il TemperatureMessage: " + message.getTemperature());
+                    	System.out.println("KitchenSupervisorActor ha ricevuto il TemperatureMessage: " + message.getTemperature());
                 	})
 					.match(SimpleMessage.class, message -> {
-                    	System.out.println("ControlPanelActor ha ricevuto il SimpleMessage: " + message.getMessage() + " di tipo: " + message.getType());
+                    	System.out.println("KitchenSupervisorActor ha ricevuto il SimpleMessage: " + message.getMessage() + " di tipo: " + message.getType());
                 	})
 				  	.match(String.class, message -> {
-                    	System.out.println("ControlPanelActor ha ricevuto il messaggio: " + message);
+                    	System.out.println("KitchenSupervisorActor ha ricevuto il messaggio: " + message);
                 	})
 		          	.build();
 	}
 
 	static Props props() {
-		return Props.create(ControlPanelActor.class);
+		return Props.create(KitchenSupervisorActor.class);
 	}
 }

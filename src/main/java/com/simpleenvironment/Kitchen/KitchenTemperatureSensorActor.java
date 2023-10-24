@@ -2,68 +2,41 @@
 package com.simpleenvironment.Kitchen;
 
 import akka.actor.AbstractActor;
-import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
-import akka.actor.ActorSystem;
 import akka.actor.Props;
 
 import com.simpleenvironment.Messages.SimpleMessage;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
-import scala.concurrent.duration.Duration;
 
-import java.util.concurrent.TimeUnit;
+import java.util.Optional;
 
 public class KitchenTemperatureSensorActor extends AbstractActor {
-    private final ActorSelection serverActor;
 
-    public KitchenTemperatureSensorActor(ActorSelection serverActor) {
-        this.serverActor = serverActor;
+    public KitchenTemperatureSensorActor() {
     }
 
     @Override
 	public Receive createReceive() {
-		// Creates the child actor within the supervisor actor context
 		return receiveBuilder()
-		          	.match(
-		            	Props.class,
-		              	props -> {
-		                	getSender().tell(getContext().actorOf(props), getSelf());
-		            })
-                    .match(SimpleMessage.class, message -> {
-                    	System.out.println("TemperatureSensorActor2 ha ricevuto il SimpleMessage: " + message.getMessage());
-                	})
-				  	.match(String.class, message -> {
-                    	System.out.println("TemperatureSensorActor2 ha ricevuto il messaggio: " + message);
-                	})
-		          	.build();
+            .match(SimpleMessage.class, this::onSimpleMessage)
+            .match(String.class, message -> {
+                        System.out.println("KitchenTemperatureSensorActor ha ricevuto il messaggio: " + message);
+            })
+            .build();
 	}
 
-
-    public static void main(String[] args) {
-
-        Config config = ConfigFactory.load();
-        
-        //Creazione del sistema di attori
-        ActorSystem system = ActorSystem.create("ServerSystem", config);
-
-        System.out.println("PORTA DEL TEMPERATURE SENSOR: " + System.getenv("PORT"));
-
-        // Crea un riferimento all'attore del server
-        ActorSelection controlPanelActor = system.actorSelection("akka://ServerSystem@127.0.0.1:2551/user/ControlPanelActor");
-
-        // Crea e avvia l'attore del client, passando il riferimento all'attore del server
-        system.actorOf(KitchenTemperatureSensorActor.props(controlPanelActor), "TemperatureSensorActor2");
-
-        // Valido
-        system.scheduler().scheduleWithFixedDelay(
-                Duration.Zero(), // Ritardo prima dell'esecuzione (0 indica che inizia immediatamente)
-                Duration.create(1, TimeUnit.SECONDS), // Intervallo tra gli invii dei messaggi
-                () -> controlPanelActor.tell("25.0 in stanza 2", ActorRef.noSender()), // Azione da eseguire
-                system.dispatcher()
-        );
-
+    void onSimpleMessage(SimpleMessage msg) throws Exception {
+        System.out.println("Sono il KitchenTemperatureSensorActor! Ho ricevuto il SimpleMessage: " + msg.getMessage() + " di tipo: " + msg.getType());
     }
+
+    @Override
+	public void preRestart(Throwable reason, Optional<Object> message) {
+		System.out.print("Preparing to restart...");		
+	}
+	
+	@Override
+	public void postRestart(Throwable reason) {
+		System.out.println("...now restarted!");	
+	}
 
     public static Props props(ActorSelection serverActor) {
         return Props.create(KitchenTemperatureSensorActor.class, serverActor);
