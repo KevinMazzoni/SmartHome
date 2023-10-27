@@ -3,21 +3,29 @@ package com.simpleenvironment.Messages;
 import java.io.Serializable;
 
 import akka.actor.ActorRef;
+import akka.actor.ActorSelection;
 
 public class SimpleMessage implements Serializable {
     
     private String message;
     private Type type;
 
-    private ActorRef childRef;
+    private ActorRef actorRef;
+
+    private ActorSelection controlPanelRef;
 
     public SimpleMessage(String message, Type type){
         this.message = message;
         this.type = type;
     }
 
-    public SimpleMessage(ActorRef childRef, Type type){
-        this.childRef = childRef;
+    public SimpleMessage(ActorRef actorRef, Type type){
+        this.actorRef = actorRef;
+        this.type = type;
+    }
+
+    public SimpleMessage(ActorSelection controlPanelRef, Type type){
+        this.controlPanelRef = controlPanelRef;
         this.type = type;
     }
 
@@ -33,7 +41,15 @@ public class SimpleMessage implements Serializable {
         return this.type;
     }
 
-    public ActorRef getChildRef(){
-        return this.childRef;
+    public ActorRef getChildActor(){
+        return this.actorRef;
+    }
+
+    public ActorSelection getControlPanelRef(){
+        return this.controlPanelRef;
+    }
+
+    public ActorRef getParentActor(){
+        return this.actorRef;
     }
 }

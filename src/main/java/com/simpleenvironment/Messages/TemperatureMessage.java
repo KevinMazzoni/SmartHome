@@ -3,13 +3,14 @@ package com.simpleenvironment.Messages;
 import java.io.Serializable;
 
 public class TemperatureMessage implements Serializable {
-    private double temperature;
+    private int temperature;
 
-    public TemperatureMessage(double temperature){
+    public TemperatureMessage(int temperature){
         this.temperature = temperature;
     }
 
-    public double getTemperature(){
+    public int getTemperature(){
         return this.temperature;
     }
+
 }

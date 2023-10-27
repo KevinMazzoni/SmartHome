@@ -39,7 +39,7 @@ public class ControlPanelActor extends AbstractActor {
 		                	getSender().tell(getContext().actorOf(props), getSelf());
 		             	})
 					.match(TemperatureMessage.class, message -> {
-                    	System.out.println("ControlPanelActor ha ricevuto il TemperatureMessage: " + message.getTemperature());
+                    	System.out.println("ControlPanelActor ha ricevuto il TemperatureMessage: " + message.getTemperature() + " da " + getSender());
                 	})
 					.match(SimpleMessage.class, message -> {
                     	System.out.println("ControlPanelActor ha ricevuto il SimpleMessage: " + message.getMessage() + " di tipo: " + message.getType());

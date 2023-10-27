@@ -37,7 +37,7 @@ public class Kitchen {
         System.out.println("PORTA DELLA KITCHEN ROOM: " + System.getenv("PORT"));
 
         // Crea l'attore del server
-        final ActorRef kitchenSupervisorActor = system.actorOf(Props.create(KitchenSupervisorActor.class, kitchenTemperatureSensorActor), "KitchenSupervisorActor");
+        final ActorRef kitchenSupervisorActor = system.actorOf(KitchenSupervisorActor.props(), "KitchenSupervisorActor");
 
         try{
             //Creo KitchenTemperatureSensorActor nel contesto di KitchenSupervisorActor, così facendo KitchenSupervisorActor supervisiona il KitchenTemperatureSensorActor
@@ -49,7 +49,20 @@ public class Kitchen {
 
             kitchenTemperatureSensorActor.tell("MESSAGGIO DAL KITCHEN SUPERVISOR ACTOR", kitchenSupervisorActor);
 
+            //Invio al kitchenSupervsorActor il riferimento a suo figlio
             kitchenSupervisorActor.tell(new SimpleMessage(kitchenTemperatureSensorActor, Type.INFO_CHILD), ActorRef.noSender());
+
+            //Invio al kitchenTemperatureSensor il riferimento a suo padre
+            kitchenTemperatureSensorActor.tell(new SimpleMessage(kitchenSupervisorActor, Type.INFO_PARENT), ActorRef.noSender());
+
+            // Crea un riferimento all'attore del controlPanel
+            ActorSelection controlPanelActor = system.actorSelection("akka://ServerSystem@127.0.0.1:2551/user/ControlPanelActor");
+
+            controlPanelActor.tell(new SimpleMessage("Prova invio SimpleMessage da Kitchen a ControlPanelActor", Type.INFO), ActorRef.noSender());
+
+            //Invio al kitchenSupervsorActor il riferimento al ControlPanelActor
+            kitchenSupervisorActor.tell(new SimpleMessage(controlPanelActor, Type.INFO_CONTROLPANEL), ActorRef.noSender());
+
         }
         catch(TimeoutException te){
             System.out.println("TimeoutException occurred!\n");
@@ -60,14 +73,6 @@ public class Kitchen {
             ie.printStackTrace();
         }
 
-        
-
-
-
-        // Crea un riferimento all'attore del controlPanel
-        ActorSelection controlPanelActor = system.actorSelection("akka://ServerSystem@127.0.0.1:2551/user/ControlPanelActor");
-
-        controlPanelActor.tell(new SimpleMessage("Prova invio SimpleMessage da Kitchen a ControlPanelActor", Type.INFO), ActorRef.noSender());
 
         // Valido
         // system.scheduler().scheduleWithFixedDelay(

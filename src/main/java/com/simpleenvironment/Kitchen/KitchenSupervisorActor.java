@@ -4,6 +4,7 @@ import java.time.Duration;
 
 import javax.swing.plaf.basic.BasicInternalFrameTitlePane.SystemMenuBar;
 
+import com.simpleenvironment.Messages.TemperatureMessage;
 import com.simpleenvironment.Messages.SimpleMessage;
 import com.simpleenvironment.Messages.TemperatureMessage;
 import com.simpleenvironment.Messages.Type;
@@ -20,6 +21,8 @@ public class KitchenSupervisorActor extends AbstractActor {
 
 	private ActorRef kitchenTemperatureSensorActor;
 
+	private ActorSelection controlPanelActor;
+
      // #strategy
     private static SupervisorStrategy strategy =
         new OneForOneStrategy(
@@ -33,9 +36,7 @@ public class KitchenSupervisorActor extends AbstractActor {
       return strategy;
     }
 
-	public KitchenSupervisorActor(ActorRef kitchenTemperatureSensorActor) {
-		this.kitchenTemperatureSensorActor = kitchenTemperatureSensorActor;
-		System.out.println("kitchenTemperatureSensorActor è proprio: " + this.kitchenTemperatureSensorActor);
+	public KitchenSupervisorActor() {
 	}
 
 	@Override
@@ -47,14 +48,18 @@ public class KitchenSupervisorActor extends AbstractActor {
 		              	props -> {
 		                	getSender().tell(getContext().actorOf(props), getSelf());
 		             	})
-					.match(TemperatureMessage.class, message -> {
-                    	System.out.println("KitchenSupervisorActor ha ricevuto il TemperatureMessage: " + message.getTemperature());
-                	})
+					// .match(TemperatureMessage.class, this::onTemperatureMessage)
 					.match(SimpleMessage.class, this::onSimpleMessage)
+					.match(TemperatureMessage.class, this::onTemperatureMessage)
 				  	.match(String.class, message -> {
                     	System.out.println("KitchenSupervisorActor ha ricevuto il messaggio: " + message);
                 	})
 		          	.build();
+	}
+
+	void onTemperatureMessage(TemperatureMessage msg){
+		System.out.println("Sono il kitchenSupervisorActor! Ho ricevuto un TemperatureMessage con temperatura: " + msg.getTemperature());
+		controlPanelActor.tell(msg, self());
 	}
 
 	void onSimpleMessage(SimpleMessage msg) throws Exception {
@@ -69,13 +74,19 @@ public class KitchenSupervisorActor extends AbstractActor {
 		// System.out.println("FINITE LE STAMPE PER FIGLIO");
 
 		switch(msg.getType()){
+			case INFO:
+				System.out.println("Ho ricevuto un INFO message");
+				break;
 			case INFO_CHILD:
 				System.out.println("INFO_CHILD message");
-				this.kitchenTemperatureSensorActor = msg.getChildRef();
+				this.kitchenTemperatureSensorActor = msg.getChildActor();
 				// msg.getChildRef().tell(new SimpleMessage("Questo è il messagio che inoltro dal KitchenSupervisorActor al KitchenTemperatureSensorActor", Type.INFO), ActorRef.noSender());
 				break;
+			case INFO_CONTROLPANEL:
+				this.controlPanelActor = msg.getControlPanelRef();
+				break;
 			case INFO_TEMPERATURE:
-				this.kitchenTemperatureSensorActor.tell(new SimpleMessage("Prova tell", Type.INFO_TEMPERATURE), getSelf());
+				this.kitchenTemperatureSensorActor.tell(new SimpleMessage("Prova tell", Type.INFO_TEMPERATURE), self());
 				break;
 			default:
 				break;
