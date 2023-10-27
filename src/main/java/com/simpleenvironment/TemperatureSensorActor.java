@@ -52,12 +52,12 @@ public class TemperatureSensorActor extends AbstractActor {
         // serverActor.tell("Temperatura: 25°C", ActorRef.noSender());
 
         // Valido
-        system.scheduler().scheduleWithFixedDelay(
-                Duration.Zero(), // Ritardo prima dell'esecuzione (0 indica che inizia immediatamente)
-                Duration.create(1, TimeUnit.SECONDS), // Intervallo tra gli invii dei messaggi
-                () -> serverActor.tell(new TemperatureMessage(0), ActorRef.noSender()), // Azione da eseguire
-                system.dispatcher()
-        );
+        // system.scheduler().scheduleWithFixedDelay(
+        //         Duration.Zero(), // Ritardo prima dell'esecuzione (0 indica che inizia immediatamente)
+        //         Duration.create(1, TimeUnit.SECONDS), // Intervallo tra gli invii dei messaggi
+        //         () -> serverActor.tell(new TemperatureMessage(0), ActorRef.noSender()), // Azione da eseguire
+        //         system.dispatcher()
+        // );
 
         //Una prova
         // scala.concurrent.Future<Object> waitingForTemperatureSensor = ask(serverActor, Props.create(TemperatureSensorActor.class), 5000);

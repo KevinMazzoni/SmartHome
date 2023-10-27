@@ -7,6 +7,8 @@ import akka.actor.ActorSelection;
 import akka.actor.Props;
 
 import com.simpleenvironment.Messages.TemperatureMessage;
+import com.simpleenvironment.Messages.Measures;
+import com.simpleenvironment.Messages.Room;
 import com.simpleenvironment.Messages.SimpleMessage;
 import com.simpleenvironment.Messages.Type;
 
@@ -16,10 +18,15 @@ public class KitchenTemperatureSensorActor extends AbstractActor {
 
     private int temperature;
     private ActorRef kitchenSupervisorActor;
+    private boolean continueToSend;
+
+    private static final boolean FIRST = true;
+    private static final boolean NOT_FIRST = false;
 
     public KitchenTemperatureSensorActor(String string) {
         System.out.println("Questa è la stringa che mi è arrivata in fase di costruzione: " + string);
         temperature = (int) (Math.round(Math.random() * 100) % 40);
+        this.continueToSend = true;
     }
 
     @Override
@@ -45,10 +52,19 @@ public class KitchenTemperatureSensorActor extends AbstractActor {
                 //Ripartire da qui, non riesco ad inviare un TemperatureMessage al KitchenSupervisorActor
                 // this.kitchenSupervisorActor.tell(new TemperatureMessage(this.temperature), ActorRef.noSender());
                 // this.kitchenSupervisorActor.tell(new SimpleMessage("Prova invio SimpleMessage a sto punto", Type.INFO), ActorRef.noSender());
-                this.kitchenSupervisorActor.tell(new TemperatureMessage(this.temperature), ActorRef.noSender());
+                // this.kitchenSupervisorActor.tell(new TemperatureMessage(this.temperature), ActorRef.noSender());
 
-            
+                this.kitchenSupervisorActor.tell(new TemperatureMessage(this.temperature, Room.KITCHEN, FIRST), self());
 
+                // Valido
+                while(continueToSend){
+                    this.kitchenSupervisorActor.tell(new TemperatureMessage(this.temperature, Room.KITCHEN, NOT_FIRST), self());
+                    Thread.sleep(1000);
+                }
+
+                break;
+            case STOP_SENDING:
+                this.continueToSend = false;
                 break;
             default:
                 break;

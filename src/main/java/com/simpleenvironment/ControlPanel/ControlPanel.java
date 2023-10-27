@@ -30,10 +30,10 @@ public class ControlPanel {
         
         ActorRef server;
 
-        //Timeout attesa temperatureSensor
+        //Timeout attesa
         scala.concurrent.duration.Duration timeout = scala.concurrent.duration.Duration.create(5, SECONDS);
 
-        // Crea l'attore del server
+        // Crea l'attore ControlPanelActor, supervisore del ServerActor
         final ActorRef controlPanelActor = system.actorOf(ControlPanelActor.props(), "ControlPanelActor");
         
         try{
@@ -41,8 +41,6 @@ public class ControlPanel {
             //Creo ServerActor nel contesto di ControlPanel, così facendo ControlPanel supervisiona il ServerActor
             scala.concurrent.Future<Object> waitingForServerActor = ask(controlPanelActor, Props.create(ServerActor.class), 5000);
             server = (ActorRef) waitingForServerActor.result(timeout, null);
-
-            server.tell("MESSAGGIO DAL CONTROL PANEL", controlPanelActor);
 
         }
         catch(TimeoutException te){
@@ -54,7 +52,8 @@ public class ControlPanel {
             ie.printStackTrace();
         }
 
-        System.out.println("Il ServerActor ha terminato di eseguire il main");
+        // controlPanelActor.tell(new SimpleMessage(server, Type.INFO_CHILD), ActorRef.noSender());
+
 
         showCli();
 

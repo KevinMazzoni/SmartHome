@@ -1,16 +1,7 @@
 package com.simpleenvironment.ControlPanel;
 
 import akka.actor.AbstractActor;
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
 import akka.actor.Props;
-
-import com.environment.HVACActor;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
-import scala.concurrent.duration.Duration;
-
-import java.util.concurrent.TimeUnit;
 
 public class ServerActor extends AbstractActor {
 

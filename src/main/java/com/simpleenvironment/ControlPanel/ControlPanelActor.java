@@ -13,6 +13,9 @@ import akka.japi.pf.DeciderBuilder;
 
 public class ControlPanelActor extends AbstractActor {
 
+	private int kitchenCurrentTemperature;
+	private int bedroomCurrentTemperature;
+
      // #strategy
     private static SupervisorStrategy strategy =
         new OneForOneStrategy(
@@ -27,6 +30,8 @@ public class ControlPanelActor extends AbstractActor {
     }
 
 	public ControlPanelActor() {
+		this.kitchenCurrentTemperature = -1;
+		this.bedroomCurrentTemperature = -1;
 	}
 
 	@Override
@@ -38,16 +43,29 @@ public class ControlPanelActor extends AbstractActor {
 		              	props -> {
 		                	getSender().tell(getContext().actorOf(props), getSelf());
 		             	})
-					.match(TemperatureMessage.class, message -> {
-                    	System.out.println("ControlPanelActor ha ricevuto il TemperatureMessage: " + message.getTemperature() + " da " + getSender());
-                	})
+					.match(TemperatureMessage.class, this::onTemperatureMessage)
 					.match(SimpleMessage.class, message -> {
                     	System.out.println("ControlPanelActor ha ricevuto il SimpleMessage: " + message.getMessage() + " di tipo: " + message.getType());
+						
                 	})
 				  	.match(String.class, message -> {
                     	System.out.println("ControlPanelActor ha ricevuto il messaggio: " + message);
                 	})
 		          	.build();
+	}
+
+	void onTemperatureMessage(TemperatureMessage msg){
+		// System.out.println("ControlPanelActor ha ricevuto il TemperatureMessage: " + msg.getTemperature() + " da " + getSender());
+		
+		switch(msg.getRoom()){
+			case KITCHEN:
+				if(msg.isFirstMeasure() || msg.getTemperature() != this.kitchenCurrentTemperature)
+					System.out.println("Kitchen temperature: " + msg.getTemperature());
+				this.kitchenCurrentTemperature = msg.getTemperature();
+				break;
+			default:
+				break;
+		}
 	}
 
 	static Props props() {
