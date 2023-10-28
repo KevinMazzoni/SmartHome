@@ -47,6 +47,21 @@ public class ControlPanel {
             server = (ActorRef) waitingForServerActor.result(timeout, null);
             controlPanelActor.tell(new SimpleMessage(server, Type.INFO_CHILD, Appliance.SERVER), ActorRef.noSender());
 
+
+            int environment = showCli();
+
+            if(environment == KITCHEN){
+                ActorSelection kitchenSupervisorActor = system.actorSelection("akka://ServerSystem@127.0.0.1:2553/user/KitchenSupervisorActor");
+                kitchenSupervisorActor.tell(new SimpleMessage("Prova invio SimpleMessage di tipo INFO_TEMPERATURE dal ControlPanel a KitchenSupervisorActor", Type.INFO_TEMPERATURE), ActorRef.noSender());
+                Thread.sleep(1000);
+                boolean wantsAirConditioning = airConditioning();
+                if(wantsAirConditioning){
+                    int desiredTemperature = setTemperature();
+                    kitchenSupervisorActor.tell(new SimpleMessage(desiredTemperature, Type.DESIRED_TEMPERATURE), controlPanelActor);
+                    server.tell(new SimpleMessage(desiredTemperature, Type.DESIRED_TEMPERATURE), ActorRef.noSender());
+                }
+            }
+
         }
         catch(TimeoutException te){
             System.out.println("TimeoutException occurred!\n");
@@ -57,19 +72,6 @@ public class ControlPanel {
             ie.printStackTrace();
         }
 
-
-        int environment = showCli();
-
-        if(environment == KITCHEN){
-            ActorSelection kitchenSupervisorActor = system.actorSelection("akka://ServerSystem@127.0.0.1:2553/user/KitchenSupervisorActor");
-            kitchenSupervisorActor.tell(new SimpleMessage("Prova invio SimpleMessage di tipo INFO_TEMPERATURE dal ControlPanel a KitchenSupervisorActor", Type.INFO_TEMPERATURE), ActorRef.noSender());
-            Thread.sleep(1000);
-            boolean wantsAirConditioning = airConditioning();
-            if(wantsAirConditioning){
-                int desiredTemperature = setTemperature();
-                kitchenSupervisorActor.tell(new SimpleMessage(desiredTemperature, Type.DESIRED_TEMPERATURE), controlPanelActor);
-            }
-        }
     }
 
     private static int showCli() {
@@ -82,7 +84,7 @@ public class ControlPanel {
 
     private static boolean airConditioning(){
         boolean choice;
-        System.out.println("\nVuoi accendere il condizionatore? y/n");
+        System.out.print("\nVuoi accendere il condizionatore? (y/n)\t");
         Scanner scanner = new Scanner(System.in);
         String answer = scanner.next();
         choice = (answer.equalsIgnoreCase("y")) ? true : false;
@@ -90,9 +92,10 @@ public class ControlPanel {
     }
 
     private static int setTemperature(){
-        System.out.println("Quale temperatura (°C) vuoi?");
+        System.out.print("Quale temperatura (°C) vuoi?\u001B[32m\t");
         Scanner scanner = new Scanner(System.in);
         int desiredTemperature = scanner.nextInt();
+        System.out.println("\u001B[0m");
         return desiredTemperature;
     }
 

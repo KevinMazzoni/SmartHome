@@ -24,7 +24,7 @@ public class KitchenHVACActor extends AbstractActor {
     private static final boolean NOT_FIRST = false;
 
     public KitchenHVACActor(String string) {
-        energyConsumption = (int) (Math.round(Math.random() * 100) % 11);
+        energyConsumption = (int) (Math.round(Math.random() * 100) % 11) + 1;
     }
 
     @Override

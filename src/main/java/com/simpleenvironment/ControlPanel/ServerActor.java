@@ -2,6 +2,7 @@ package com.simpleenvironment.ControlPanel;
 
 import com.simpleenvironment.Messages.SimpleMessage;
 import com.simpleenvironment.Messages.TemperatureMessage;
+import com.simpleenvironment.Messages.Type;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
@@ -11,6 +12,7 @@ public class ServerActor extends AbstractActor {
 
     private int kitchenCurrentTemperature;
 	private int bedroomCurrentTemperature;
+    private int desiredTemperature;
 
     public ServerActor(){
         this.kitchenCurrentTemperature = -1;
@@ -37,7 +39,8 @@ public class ServerActor extends AbstractActor {
     }
 
     void onSimpleMessage(SimpleMessage msg) throws Exception {
-        System.out.println("ServerActor ha ricevuto il SimpleMessage: " + msg.getMessage());
+        if(msg.getType().equals(Type.DESIRED_TEMPERATURE))
+            this.desiredTemperature = msg.getDesiredTemperature();
     }
 
     void onTemperatureMessage(TemperatureMessage msg) throws Exception {
@@ -47,8 +50,19 @@ public class ServerActor extends AbstractActor {
 		switch(msg.getRoom()){
 			case KITCHEN:
 				if(msg.isFirstMeasure() || msg.getTemperature() != this.kitchenCurrentTemperature){
-					System.out.println("Consumo elettrico cucina: " + msg.getEnergyConsumption() + " W");
-                    System.out.println("Temperatura cucina: " + msg.getTemperature() + "° C");
+                    
+                    if(msg.isFirstMeasure()) 
+                        System.out.println("Temperatura cucina: "/*\u001B[33m"*/ + msg.getTemperature() + "° C\u001B[0m\tConsumo elettrico cucina: " + msg.getEnergyConsumption() + " W");
+                    
+                    else if(msg.getTemperature() > this.kitchenCurrentTemperature && msg.getTemperature() != this.desiredTemperature)
+                        System.out.println("Temperatura cucina: \u001B[31m" + msg.getTemperature() + "° C\u001B[0m\tConsumo elettrico cucina: " + msg.getEnergyConsumption() + " W");
+                    
+                    else if(msg.getTemperature() < this.kitchenCurrentTemperature && msg.getTemperature() != this.desiredTemperature)
+                        System.out.println("Temperatura cucina: \u001B[34m" + msg.getTemperature() + "° C\u001B[0m\tConsumo elettrico cucina: " + msg.getEnergyConsumption() + " W");
+                    
+                    else //Qui ho raggiunto la temperatura desiderata
+                        System.out.println("Temperatura cucina: \u001B[32m" + msg.getTemperature() + "° C\u001B[0m\tConsumo elettrico cucina: " + msg.getEnergyConsumption() + " W");
+
                 }
 				this.kitchenCurrentTemperature = msg.getTemperature();
 				break;

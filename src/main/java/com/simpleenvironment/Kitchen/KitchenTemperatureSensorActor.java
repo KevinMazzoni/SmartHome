@@ -28,8 +28,8 @@ public class KitchenTemperatureSensorActor extends AbstractActor {
 
     public KitchenTemperatureSensorActor(String string) {
         // System.out.println("Questa è la stringa che mi è arrivata in fase di costruzione: " + string);
-        temperature = (int) (Math.round(Math.random() * 100) % 40);
-        energyConsumption = (int) (Math.round(Math.random() * 100) % 11);
+        temperature = (int) (Math.round(Math.random() * 100) % 40) + 1;
+        energyConsumption = (int) (Math.round(Math.random() * 100) % 10) + 1;
         this.continueToSend = true;
         this.counter = 0;
     }
@@ -50,13 +50,13 @@ public class KitchenTemperatureSensorActor extends AbstractActor {
         if(this.temperature >= msg.getTemperature())
             while(this.temperature > msg.getTemperature()){
                 this.temperature --;
-                this.kitchenSupervisorActor.tell(new TemperatureMessage(this.temperature, this.energyConsumption, Room.KITCHEN, Appliance.TEMPERATURE_SENSOR, FIRST), self());
+                this.kitchenSupervisorActor.tell(new TemperatureMessage(this.temperature, this.energyConsumption, Room.KITCHEN, Appliance.TEMPERATURE_SENSOR, NOT_FIRST), self());
                 Thread.sleep(1000);
             }
         else
             while(this.temperature < msg.getTemperature()){
                 this.temperature ++;
-                this.kitchenSupervisorActor.tell(new TemperatureMessage(this.temperature, this.energyConsumption, Room.KITCHEN, Appliance.TEMPERATURE_SENSOR, FIRST), self());
+                this.kitchenSupervisorActor.tell(new TemperatureMessage(this.temperature, this.energyConsumption, Room.KITCHEN, Appliance.TEMPERATURE_SENSOR, NOT_FIRST), self());
                 Thread.sleep(1000);
             }
     }
