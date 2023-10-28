@@ -2,11 +2,10 @@ package com.simpleenvironment.Kitchen;
 
 import java.time.Duration;
 
-import javax.swing.plaf.basic.BasicInternalFrameTitlePane.SystemMenuBar;
-
 import com.simpleenvironment.Messages.TemperatureMessage;
+import com.simpleenvironment.Messages.Appliance;
+import com.simpleenvironment.Messages.Room;
 import com.simpleenvironment.Messages.SimpleMessage;
-import com.simpleenvironment.Messages.TemperatureMessage;
 import com.simpleenvironment.Messages.Type;
 
 import akka.actor.AbstractActor;
@@ -20,15 +19,24 @@ import akka.japi.pf.DeciderBuilder;
 public class KitchenSupervisorActor extends AbstractActor {
 
 	private ActorRef kitchenTemperatureSensorActor;
+	private ActorRef kitchenHVACActor;
 
 	private ActorSelection controlPanelActor;
+	private boolean temperatureSensorOn;
+	private boolean HVACOn;
+
+	private static final boolean ON = true;
+	private static final boolean OFF = false;
+
+	private int sensorConsumption;
+	private int HVACConsumption;
 
      // #strategy
     private static SupervisorStrategy strategy =
         new OneForOneStrategy(
             1, // Max no of retries
             Duration.ofMinutes(1), // Within what time period
-            DeciderBuilder.match(Exception.class, e -> SupervisorStrategy.restart())
+            DeciderBuilder.match(Exception.class, e -> SupervisorStrategy.resume())
                 .build());
 
     @Override
@@ -37,6 +45,10 @@ public class KitchenSupervisorActor extends AbstractActor {
     }
 
 	public KitchenSupervisorActor() {
+		this.temperatureSensorOn = OFF;
+		this.HVACOn = OFF;
+		this.sensorConsumption = 0;
+		this.HVACConsumption = 0;
 	}
 
 	@Override
@@ -59,28 +71,38 @@ public class KitchenSupervisorActor extends AbstractActor {
 
 	void onTemperatureMessage(TemperatureMessage msg){
 		System.out.println("Sono il kitchenSupervisorActor! Ho ricevuto un TemperatureMessage con temperatura: " + msg.getTemperature());
-		controlPanelActor.tell(msg, self());
+		System.out.println("temperature sensor on: " + this.temperatureSensorOn);
+		System.out.println("HVAC on: " + this.HVACOn);
+		if(!temperatureSensorOn && msg.getAppliance().equals(Appliance.TEMPERATURE_SENSOR)){
+			this.temperatureSensorOn = ON;
+			this.sensorConsumption = msg.getEnergyConsumption();
+		}
+		if(!HVACOn && msg.getAppliance().equals(Appliance.HVAC)){
+			this.HVACOn = ON;
+			this.HVACConsumption = msg.getEnergyConsumption();
+			this.kitchenTemperatureSensorActor.tell(new TemperatureMessage(msg.getTemperature(), this.HVACConsumption, Room.KITCHEN, Appliance.HVAC, true), self());
+		}
+		if(msg.getAppliance().equals(Appliance.TEMPERATURE_SENSOR)){
+			TemperatureMessage toSend = new TemperatureMessage(msg.getTemperature(), (this.sensorConsumption + this.HVACConsumption), Room.KITCHEN, Appliance.KITCHEN_SUPERVISOR, msg.isFirstMeasure());
+			controlPanelActor.tell(toSend, self());
+		}
 	}
 
 	void onSimpleMessage(SimpleMessage msg) throws Exception {
-		// System.out.println("KitchenSupervisorActor ha ricevuto il SimpleMessage: " + msg.getMessage() + " di tipo: " + msg.getType());
-		// System.out.println("INIZIO DELLE STAMPE PER FIGLIO");
-		// System.out.println(getContext().actorSelection("KitchenTemperatureSensorActor"));
-		// ActorSelection kitchenTemperatureSensorActor = getContext().actorSelection("KitchenTemperatureSensorActor");
-		// kitchenTemperatureSensorActor.tell(new SimpleMessage("Questo è il messagio che inoltro dal KitchenSupervisorActor al KitchenTemperatureSensorActor", Type.INFO), ActorRef.noSender());
-		// System.out.println(getContext().child("KitcheTemperatureSensorActor"));
-		// System.out.println(getContext().findChild("KitcheTemperatureSensorActor"));
-		// System.out.println(getContext().findChild("KitcheTemperatureSensorActor"));
-		// System.out.println("FINITE LE STAMPE PER FIGLIO");
 
 		switch(msg.getType()){
 			case INFO:
 				System.out.println("Ho ricevuto un INFO message");
 				break;
 			case INFO_CHILD:
-				// System.out.println("INFO_CHILD message");
-				this.kitchenTemperatureSensorActor = msg.getChildActor();
-				// msg.getChildRef().tell(new SimpleMessage("Questo è il messagio che inoltro dal KitchenSupervisorActor al KitchenTemperatureSensorActor", Type.INFO), ActorRef.noSender());
+				if(msg.getAppliance().equals(Appliance.TEMPERATURE_SENSOR)){
+					this.kitchenTemperatureSensorActor = msg.getChildActor();
+					System.out.println("Sono il KitchenSupervisorActor, setto il child kitchenTemperatureSensorActor a: " + this.kitchenTemperatureSensorActor);
+				}
+				if(msg.getAppliance().equals(Appliance.HVAC)){
+					this.kitchenHVACActor = msg.getChildActor();
+					System.out.println("Sono il KitchenSupervisorActor, setto il child kitchenHVACActor a: " + this.kitchenHVACActor);
+				}
 				break;
 			case INFO_CONTROLPANEL:
 				this.controlPanelActor = msg.getControlPanelRef();
@@ -89,7 +111,12 @@ public class KitchenSupervisorActor extends AbstractActor {
 				this.kitchenTemperatureSensorActor.tell(new SimpleMessage("Prova tell", Type.INFO_TEMPERATURE), self());
 				break;
 			case DESIRED_TEMPERATURE:
-				System.out.println("Ho ricevuto un DESIRED_TEMPERATURE: " + msg.getDesiredTemperature());
+				//Ripartire da qui, gestire un DESIRED_TEMPERATURE da parte del HVACActor
+				System.out.println("Sono il KitchenSupervisorActor, ho ricevuto un DESIRED TEMPERATURE a " + msg.getDesiredTemperature());
+				this.kitchenHVACActor.tell(msg, kitchenHVACActor);
+				this.kitchenTemperatureSensorActor.tell(new TemperatureMessage(msg.getDesiredTemperature(), this.HVACConsumption, Room.KITCHEN, Appliance.HVAC, true), self());
+				// this.kitchenTemperatureSensorActor.tell(new SimpleMessage("Prova invio Simple", Type.INFO), self());
+				// this.kitchenTemperatureSensorActor.tell(new TemperatureMessage(msg.getDesiredTemperature(), this.HVACConsumption, Room.KITCHEN, Appliance.HVAC, true), self());
 				break;
 			default:
 				break;

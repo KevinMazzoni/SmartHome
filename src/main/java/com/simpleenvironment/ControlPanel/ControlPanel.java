@@ -7,6 +7,7 @@ import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 
+import com.simpleenvironment.Messages.Appliance;
 import com.simpleenvironment.Messages.SimpleMessage;
 import com.simpleenvironment.Messages.TemperatureMessage;
 import com.simpleenvironment.Messages.Type;
@@ -44,7 +45,7 @@ public class ControlPanel {
             //Creo ServerActor nel contesto di ControlPanel, così facendo ControlPanel supervisiona il ServerActor
             scala.concurrent.Future<Object> waitingForServerActor = ask(controlPanelActor, Props.create(ServerActor.class), 5000);
             server = (ActorRef) waitingForServerActor.result(timeout, null);
-            controlPanelActor.tell(new SimpleMessage(server, Type.INFO_CHILD), ActorRef.noSender());
+            controlPanelActor.tell(new SimpleMessage(server, Type.INFO_CHILD, Appliance.SERVER), ActorRef.noSender());
 
         }
         catch(TimeoutException te){

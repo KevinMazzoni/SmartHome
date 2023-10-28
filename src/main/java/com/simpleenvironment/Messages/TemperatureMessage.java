@@ -7,11 +7,13 @@ public class TemperatureMessage implements Serializable {
     private int energyConsumption;
     private Room room;
     private boolean isFirstMeasure;
+    private Appliance appliance;
 
-    public TemperatureMessage(int temperature, int energyConsumption, Room room, boolean isFirstMeasure){
+    public TemperatureMessage(int temperature, int energyConsumption, Room room, Appliance appliance, boolean isFirstMeasure){
         this.temperature = temperature;
         this.energyConsumption = energyConsumption;
         this.room = room;
+        this.appliance = appliance;
         this.isFirstMeasure = isFirstMeasure;
     }
 
@@ -21,6 +23,10 @@ public class TemperatureMessage implements Serializable {
 
     public Room getRoom(){
         return this.room;
+    }
+
+    public Appliance getAppliance(){
+        return this.appliance;
     }
 
     public int getEnergyConsumption(){

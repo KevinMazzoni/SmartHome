@@ -6,8 +6,10 @@ public enum Type {
     INFO_TEMPERATURE,
     INFO_CHILD,
     INFO_PARENT,
+    INFO_SIBLING,
     INFO_CONTROLPANEL,
     DESIRED_TEMPERATURE,
+    SET_TEMPERATURE,
     STOP_SENDING
     /*Altri*/
 };
