@@ -9,6 +9,7 @@ public class SimpleMessage implements Serializable {
     
     private String message;
     private Type type;
+    private int desiredTemperature;
 
     private ActorRef actorRef;
 
@@ -26,6 +27,11 @@ public class SimpleMessage implements Serializable {
 
     public SimpleMessage(ActorSelection controlPanelRef, Type type){
         this.controlPanelRef = controlPanelRef;
+        this.type = type;
+    }
+
+    public SimpleMessage(int desiredTemperature, Type type){
+        this.desiredTemperature = desiredTemperature;
         this.type = type;
     }
 
@@ -51,5 +57,9 @@ public class SimpleMessage implements Serializable {
 
     public ActorRef getParentActor(){
         return this.actorRef;
+    }
+
+    public int getDesiredTemperature(){
+        return this.desiredTemperature;
     }
 }

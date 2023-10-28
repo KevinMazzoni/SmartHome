@@ -20,7 +20,10 @@ import java.util.concurrent.TimeoutException;
 
 public class ControlPanel {
 
-    public static void main(String[] args) {
+    private static final int KITCHEN = 1;
+    private static final int BEDROOM = 2;
+
+    public static void main(String[] args) throws InterruptedException {
 
         // Carica la configurazione da application.conf
         Config config = ConfigFactory.load();
@@ -41,6 +44,7 @@ public class ControlPanel {
             //Creo ServerActor nel contesto di ControlPanel, così facendo ControlPanel supervisiona il ServerActor
             scala.concurrent.Future<Object> waitingForServerActor = ask(controlPanelActor, Props.create(ServerActor.class), 5000);
             server = (ActorRef) waitingForServerActor.result(timeout, null);
+            controlPanelActor.tell(new SimpleMessage(server, Type.INFO_CHILD), ActorRef.noSender());
 
         }
         catch(TimeoutException te){
@@ -52,26 +56,43 @@ public class ControlPanel {
             ie.printStackTrace();
         }
 
-        // controlPanelActor.tell(new SimpleMessage(server, Type.INFO_CHILD), ActorRef.noSender());
 
+        int environment = showCli();
 
-        showCli();
-
-        ActorSelection kitchenSupervisorActor = system.actorSelection("akka://ServerSystem@127.0.0.1:2553/user/KitchenSupervisorActor");
-
-        kitchenSupervisorActor.tell(new SimpleMessage("Prova invio SimpleMessage da ControlPanel a KitchenSupervisorActor", Type.INFO), ActorRef.noSender());
-
-        // kitchenSupervisorActor.tell(new TemperatureMessage(0), ActorRef.noSender());
-
-        kitchenSupervisorActor.tell(new SimpleMessage("Prova invio SimpleMessage di tipo INFO_TEMPERATURE dal ControlPanel a KitchenSupervisorActor", Type.INFO_TEMPERATURE), ActorRef.noSender());
+        if(environment == KITCHEN){
+            ActorSelection kitchenSupervisorActor = system.actorSelection("akka://ServerSystem@127.0.0.1:2553/user/KitchenSupervisorActor");
+            kitchenSupervisorActor.tell(new SimpleMessage("Prova invio SimpleMessage di tipo INFO_TEMPERATURE dal ControlPanel a KitchenSupervisorActor", Type.INFO_TEMPERATURE), ActorRef.noSender());
+            Thread.sleep(1000);
+            boolean wantsAirConditioning = airConditioning();
+            if(wantsAirConditioning){
+                int desiredTemperature = setTemperature();
+                kitchenSupervisorActor.tell(new SimpleMessage(desiredTemperature, Type.DESIRED_TEMPERATURE), controlPanelActor);
+            }
+        }
     }
 
-    private static void showCli() {
+    private static int showCli() {
         System.out.println("Scegli la stanza: \n1. Cucina\n2. Salotto\n3. Camera da letto");
         Scanner scanner = new Scanner(System.in);
         int choice = scanner.nextInt();
-        System.out.println("Scelta effettuata: " + choice);
+        System.out.println();
+        return choice;
+    }
 
+    private static boolean airConditioning(){
+        boolean choice;
+        System.out.println("\nVuoi accendere il condizionatore? y/n");
+        Scanner scanner = new Scanner(System.in);
+        String answer = scanner.next();
+        choice = (answer.equalsIgnoreCase("y")) ? true : false;
+        return choice;
+    }
+
+    private static int setTemperature(){
+        System.out.println("Quale temperatura (°C) vuoi?");
+        Scanner scanner = new Scanner(System.in);
+        int desiredTemperature = scanner.nextInt();
+        return desiredTemperature;
     }
 
     static Props props() {

@@ -63,7 +63,7 @@ public class KitchenSupervisorActor extends AbstractActor {
 	}
 
 	void onSimpleMessage(SimpleMessage msg) throws Exception {
-		System.out.println("KitchenSupervisorActor ha ricevuto il SimpleMessage: " + msg.getMessage() + " di tipo: " + msg.getType());
+		// System.out.println("KitchenSupervisorActor ha ricevuto il SimpleMessage: " + msg.getMessage() + " di tipo: " + msg.getType());
 		// System.out.println("INIZIO DELLE STAMPE PER FIGLIO");
 		// System.out.println(getContext().actorSelection("KitchenTemperatureSensorActor"));
 		// ActorSelection kitchenTemperatureSensorActor = getContext().actorSelection("KitchenTemperatureSensorActor");
@@ -78,7 +78,7 @@ public class KitchenSupervisorActor extends AbstractActor {
 				System.out.println("Ho ricevuto un INFO message");
 				break;
 			case INFO_CHILD:
-				System.out.println("INFO_CHILD message");
+				// System.out.println("INFO_CHILD message");
 				this.kitchenTemperatureSensorActor = msg.getChildActor();
 				// msg.getChildRef().tell(new SimpleMessage("Questo è il messagio che inoltro dal KitchenSupervisorActor al KitchenTemperatureSensorActor", Type.INFO), ActorRef.noSender());
 				break;
@@ -87,6 +87,9 @@ public class KitchenSupervisorActor extends AbstractActor {
 				break;
 			case INFO_TEMPERATURE:
 				this.kitchenTemperatureSensorActor.tell(new SimpleMessage("Prova tell", Type.INFO_TEMPERATURE), self());
+				break;
+			case DESIRED_TEMPERATURE:
+				System.out.println("Ho ricevuto un DESIRED_TEMPERATURE: " + msg.getDesiredTemperature());
 				break;
 			default:
 				break;

@@ -7,7 +7,6 @@ import akka.actor.ActorSelection;
 import akka.actor.Props;
 
 import com.simpleenvironment.Messages.TemperatureMessage;
-import com.simpleenvironment.Messages.Measures;
 import com.simpleenvironment.Messages.Room;
 import com.simpleenvironment.Messages.SimpleMessage;
 import com.simpleenvironment.Messages.Type;
@@ -17,6 +16,7 @@ import java.util.Optional;
 public class KitchenTemperatureSensorActor extends AbstractActor {
 
     private int temperature;
+    private int energyConsumption;
     private ActorRef kitchenSupervisorActor;
     private boolean continueToSend;
 
@@ -24,8 +24,9 @@ public class KitchenTemperatureSensorActor extends AbstractActor {
     private static final boolean NOT_FIRST = false;
 
     public KitchenTemperatureSensorActor(String string) {
-        System.out.println("Questa è la stringa che mi è arrivata in fase di costruzione: " + string);
+        // System.out.println("Questa è la stringa che mi è arrivata in fase di costruzione: " + string);
         temperature = (int) (Math.round(Math.random() * 100) % 40);
+        energyConsumption = (int) (Math.round(Math.random() * 100) % 11);
         this.continueToSend = true;
     }
 
@@ -37,7 +38,7 @@ public class KitchenTemperatureSensorActor extends AbstractActor {
                         System.out.println("KitchenTemperatureSensorActor ha ricevuto il TemperatureMessage: " + message);
             })
             .match(String.class, message -> {
-                        System.out.println("KitchenTemperatureSensorActor ha ricevuto il messaggio: " + message);
+                        // System.out.println("KitchenTemperatureSensorActor ha ricevuto il messaggio: " + message);
             })
             .build();
 	}
@@ -54,11 +55,11 @@ public class KitchenTemperatureSensorActor extends AbstractActor {
                 // this.kitchenSupervisorActor.tell(new SimpleMessage("Prova invio SimpleMessage a sto punto", Type.INFO), ActorRef.noSender());
                 // this.kitchenSupervisorActor.tell(new TemperatureMessage(this.temperature), ActorRef.noSender());
 
-                this.kitchenSupervisorActor.tell(new TemperatureMessage(this.temperature, Room.KITCHEN, FIRST), self());
+                this.kitchenSupervisorActor.tell(new TemperatureMessage(this.temperature, this.energyConsumption, Room.KITCHEN, FIRST), self());
 
                 // Valido
                 while(continueToSend){
-                    this.kitchenSupervisorActor.tell(new TemperatureMessage(this.temperature, Room.KITCHEN, NOT_FIRST), self());
+                    this.kitchenSupervisorActor.tell(new TemperatureMessage(this.temperature, this.energyConsumption, Room.KITCHEN, NOT_FIRST), self());
                     Thread.sleep(1000);
                 }
 
@@ -69,7 +70,7 @@ public class KitchenTemperatureSensorActor extends AbstractActor {
             default:
                 break;
         }
-        System.out.println("Sono il KitchenTemperatureSensorActor! Ho ricevuto il SimpleMessage: " + msg.getMessage() + " di tipo: " + msg.getType());
+        // System.out.println("Sono il KitchenTemperatureSensorActor! Ho ricevuto il SimpleMessage: " + msg.getMessage() + " di tipo: " + msg.getType());
     }
 
     @Override

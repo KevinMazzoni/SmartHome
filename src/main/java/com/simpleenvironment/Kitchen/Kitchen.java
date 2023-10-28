@@ -34,7 +34,7 @@ public class Kitchen {
         //Timeout attesa temperatureSensor
         scala.concurrent.duration.Duration timeout = scala.concurrent.duration.Duration.create(5, SECONDS);
 
-        System.out.println("PORTA DELLA KITCHEN ROOM: " + System.getenv("PORT"));
+        // System.out.println("PORTA DELLA KITCHEN ROOM: " + System.getenv("PORT"));
 
         // Crea l'attore del server
         final ActorRef kitchenSupervisorActor = system.actorOf(KitchenSupervisorActor.props(), "KitchenSupervisorActor");
@@ -47,7 +47,6 @@ public class Kitchen {
             
             kitchenTemperatureSensorActor = (ActorRef) waitingForKitchenTemperatureSensorActor.result(timeout, null);
 
-            kitchenTemperatureSensorActor.tell("MESSAGGIO DAL KITCHEN SUPERVISOR ACTOR", kitchenSupervisorActor);
 
             //Invio al kitchenSupervsorActor il riferimento a suo figlio
             kitchenSupervisorActor.tell(new SimpleMessage(kitchenTemperatureSensorActor, Type.INFO_CHILD), ActorRef.noSender());
@@ -58,7 +57,7 @@ public class Kitchen {
             // Crea un riferimento all'attore del controlPanel
             ActorSelection controlPanelActor = system.actorSelection("akka://ServerSystem@127.0.0.1:2551/user/ControlPanelActor");
 
-            controlPanelActor.tell(new SimpleMessage("Prova invio SimpleMessage da Kitchen a ControlPanelActor", Type.INFO), ActorRef.noSender());
+            // controlPanelActor.tell(new SimpleMessage("Prova invio SimpleMessage da Kitchen a ControlPanelActor", Type.INFO), ActorRef.noSender());
 
             //Invio al kitchenSupervsorActor il riferimento al ControlPanelActor
             kitchenSupervisorActor.tell(new SimpleMessage(controlPanelActor, Type.INFO_CONTROLPANEL), ActorRef.noSender());

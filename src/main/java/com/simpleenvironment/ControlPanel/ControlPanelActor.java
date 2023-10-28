@@ -4,14 +4,18 @@ import java.time.Duration;
 
 import com.simpleenvironment.Messages.SimpleMessage;
 import com.simpleenvironment.Messages.TemperatureMessage;
+import com.simpleenvironment.Messages.Type;
 
 import akka.actor.AbstractActor;
+import akka.actor.ActorRef;
 import akka.actor.OneForOneStrategy;
 import akka.actor.Props;
 import akka.actor.SupervisorStrategy;
 import akka.japi.pf.DeciderBuilder;
 
 public class ControlPanelActor extends AbstractActor {
+
+	private ActorRef serverActor;
 
 	private int kitchenCurrentTemperature;
 	private int bedroomCurrentTemperature;
@@ -44,10 +48,7 @@ public class ControlPanelActor extends AbstractActor {
 		                	getSender().tell(getContext().actorOf(props), getSelf());
 		             	})
 					.match(TemperatureMessage.class, this::onTemperatureMessage)
-					.match(SimpleMessage.class, message -> {
-                    	System.out.println("ControlPanelActor ha ricevuto il SimpleMessage: " + message.getMessage() + " di tipo: " + message.getType());
-						
-                	})
+					.match(SimpleMessage.class, this::onSimpleMessage)
 				  	.match(String.class, message -> {
                     	System.out.println("ControlPanelActor ha ricevuto il messaggio: " + message);
                 	})
@@ -55,13 +56,16 @@ public class ControlPanelActor extends AbstractActor {
 	}
 
 	void onTemperatureMessage(TemperatureMessage msg){
-		// System.out.println("ControlPanelActor ha ricevuto il TemperatureMessage: " + msg.getTemperature() + " da " + getSender());
-		
-		switch(msg.getRoom()){
-			case KITCHEN:
-				if(msg.isFirstMeasure() || msg.getTemperature() != this.kitchenCurrentTemperature)
-					System.out.println("Kitchen temperature: " + msg.getTemperature());
-				this.kitchenCurrentTemperature = msg.getTemperature();
+		this.serverActor.tell(msg, ActorRef.noSender());
+	}
+
+	void onSimpleMessage(SimpleMessage msg){
+
+		switch(msg.getType()){
+			case INFO_CHILD:
+				this.serverActor = msg.getChildActor();
+				// System.out.println("Sto settando il childActor a: " + msg.getChildActor());
+				// this.serverActor.tell(new SimpleMessage("Prova di invio di un simplemessage da ControlPanelActor a ServerActor", Type.INFO), serverActor);
 				break;
 			default:
 				break;
