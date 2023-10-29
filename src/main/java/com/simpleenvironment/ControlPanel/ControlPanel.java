@@ -21,9 +21,6 @@ import java.util.concurrent.TimeoutException;
 
 public class ControlPanel {
 
-    private static final int KITCHEN = 1;
-    private static final int BEDROOM = 2;
-
     public static void main(String[] args) throws InterruptedException {
 
         // Carica la configurazione da application.conf
@@ -45,58 +42,24 @@ public class ControlPanel {
             //Creo ServerActor nel contesto di ControlPanel, così facendo ControlPanel supervisiona il ServerActor
             scala.concurrent.Future<Object> waitingForServerActor = ask(controlPanelActor, Props.create(ServerActor.class), 5000);
             server = (ActorRef) waitingForServerActor.result(timeout, null);
+            
+            //Informo il ControlPanelActor di suo figlio ServerActor
             controlPanelActor.tell(new SimpleMessage(server, Type.INFO_CHILD, Appliance.SERVER), ActorRef.noSender());
 
+            //Informo il ServerActor dell'ActorSystem
+            server.tell(new SimpleMessage(system, Type.INFO_ACTOR_SYSTEM), ActorRef.noSender());
 
-            int environment = showCli();
+            //Informo il ServerActor di suo padre ControlPanelActor
+            server.tell(new SimpleMessage(controlPanelActor, Type.INFO_CONTROLPANEL, Appliance.SERVER), ActorRef.noSender());
 
-            if(environment == KITCHEN){
-                ActorSelection kitchenSupervisorActor = system.actorSelection("akka://ServerSystem@127.0.0.1:2553/user/KitchenSupervisorActor");
-                kitchenSupervisorActor.tell(new SimpleMessage("Prova invio SimpleMessage di tipo INFO_TEMPERATURE dal ControlPanel a KitchenSupervisorActor", Type.INFO_TEMPERATURE), ActorRef.noSender());
-                Thread.sleep(1000);
-                boolean wantsAirConditioning = airConditioning();
-                if(wantsAirConditioning){
-                    int desiredTemperature = setTemperature();
-                    kitchenSupervisorActor.tell(new SimpleMessage(desiredTemperature, Type.DESIRED_TEMPERATURE), controlPanelActor);
-                    server.tell(new SimpleMessage(desiredTemperature, Type.DESIRED_TEMPERATURE), ActorRef.noSender());
-                }
-            }
+            server.tell(new SimpleMessage("START", Type.START), ActorRef.noSender());
 
         }
         catch(TimeoutException te){
             System.out.println("TimeoutException occurred!\n");
             te.printStackTrace();
         }
-        catch(InterruptedException ie){
-            System.out.println("InterruptedException occurred!\n");
-            ie.printStackTrace();
-        }
 
-    }
-
-    private static int showCli() {
-        System.out.println("Scegli la stanza: \n1. Cucina\n2. Salotto\n3. Camera da letto");
-        Scanner scanner = new Scanner(System.in);
-        int choice = scanner.nextInt();
-        System.out.println();
-        return choice;
-    }
-
-    private static boolean airConditioning(){
-        boolean choice;
-        System.out.print("\nVuoi accendere il condizionatore? (y/n)\t");
-        Scanner scanner = new Scanner(System.in);
-        String answer = scanner.next();
-        choice = (answer.equalsIgnoreCase("y")) ? true : false;
-        return choice;
-    }
-
-    private static int setTemperature(){
-        System.out.print("Quale temperatura (°C) vuoi?\u001B[32m\t");
-        Scanner scanner = new Scanner(System.in);
-        int desiredTemperature = scanner.nextInt();
-        System.out.println("\u001B[0m");
-        return desiredTemperature;
     }
 
     static Props props() {

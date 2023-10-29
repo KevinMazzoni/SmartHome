@@ -62,6 +62,9 @@ public class ControlPanelActor extends AbstractActor {
 	void onSimpleMessage(SimpleMessage msg){
 
 		switch(msg.getType()){
+			case START:
+				this.serverActor.tell(msg, self());
+				break;
 			case INFO_CHILD:
 				this.serverActor = msg.getChildActor();
 				// System.out.println("Sto settando il childActor a: " + msg.getChildActor());

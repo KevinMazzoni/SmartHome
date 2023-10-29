@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
+import akka.actor.ActorSystem;
 
 public class SimpleMessage implements Serializable {
     
@@ -15,6 +16,8 @@ public class SimpleMessage implements Serializable {
     private Appliance appliance;
 
     private ActorSelection controlPanelRef;
+
+    private ActorSystem actorSystem;
 
     public SimpleMessage(String message, Type type){
         this.message = message;
@@ -29,6 +32,11 @@ public class SimpleMessage implements Serializable {
 
     public SimpleMessage(ActorSelection controlPanelRef, Type type){
         this.controlPanelRef = controlPanelRef;
+        this.type = type;
+    }
+
+    public SimpleMessage(ActorSystem actorSystem, Type type){
+        this.actorSystem = actorSystem;
         this.type = type;
     }
 
@@ -67,6 +75,10 @@ public class SimpleMessage implements Serializable {
 
     public ActorSelection getControlPanelRef(){
         return this.controlPanelRef;
+    }
+
+    public ActorSystem getActorSystem(){
+        return this.actorSystem;
     }
 
     public int getDesiredTemperature(){

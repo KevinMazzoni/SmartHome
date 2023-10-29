@@ -1,7 +1,9 @@
 package com.simpleenvironment.Messages;
 
 public enum Type {
+    START,
     INFO,
+    INFO_ACTOR_SYSTEM,
     ERROR,
     INFO_TEMPERATURE,
     INFO_CHILD,
@@ -10,6 +12,6 @@ public enum Type {
     INFO_CONTROLPANEL,
     DESIRED_TEMPERATURE,
     SET_TEMPERATURE,
-    STOP_SENDING
+    STOP_SENDING,
     /*Altri*/
 };

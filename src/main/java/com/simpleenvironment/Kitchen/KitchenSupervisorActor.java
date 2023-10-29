@@ -114,6 +114,7 @@ public class KitchenSupervisorActor extends AbstractActor {
 				//Ripartire da qui, gestire un DESIRED_TEMPERATURE da parte del HVACActor
 				System.out.println("Sono il KitchenSupervisorActor, ho ricevuto un DESIRED TEMPERATURE a " + msg.getDesiredTemperature());
 				this.kitchenHVACActor.tell(msg, kitchenHVACActor);
+				//Qui magari mandare un messaggio al ControlPanelActor al corretto avvio del HVAC
 				this.kitchenTemperatureSensorActor.tell(new TemperatureMessage(msg.getDesiredTemperature(), this.HVACConsumption, Room.KITCHEN, Appliance.HVAC, true), self());
 				// this.kitchenTemperatureSensorActor.tell(new SimpleMessage("Prova invio Simple", Type.INFO), self());
 				// this.kitchenTemperatureSensorActor.tell(new TemperatureMessage(msg.getDesiredTemperature(), this.HVACConsumption, Room.KITCHEN, Appliance.HVAC, true), self());
