@@ -50,19 +50,14 @@ public class ServerActor extends AbstractActor {
 		switch(msg.getRoom()){
 			case KITCHEN:
 				if(msg.isFirstMeasure() || msg.getTemperature() != this.kitchenCurrentTemperature){
-                    
                     if(msg.isFirstMeasure()) 
-                        System.out.println("Temperatura cucina: "/*\u001B[33m"*/ + msg.getTemperature() + "° C\u001B[0m\tConsumo elettrico cucina: " + msg.getEnergyConsumption() + " W");
-                    
+                        System.out.println("Temperatura cucina: "/*\u001B[33m"*/ + msg.getTemperature() + "° C\u001B[0m\tConsumo elettrico cucina: " + msg.getEnergyConsumption() + " W");  
                     else if(msg.getTemperature() > this.kitchenCurrentTemperature && msg.getTemperature() != this.desiredTemperature)
-                        System.out.println("Temperatura cucina: \u001B[31m" + msg.getTemperature() + "° C\u001B[0m\tConsumo elettrico cucina: " + msg.getEnergyConsumption() + " W");
-                    
+                        System.out.println("Temperatura cucina: \u001B[31m" + msg.getTemperature() + "° C\u001B[0m\tConsumo elettrico cucina: " + msg.getEnergyConsumption() + " W"); 
                     else if(msg.getTemperature() < this.kitchenCurrentTemperature && msg.getTemperature() != this.desiredTemperature)
                         System.out.println("Temperatura cucina: \u001B[34m" + msg.getTemperature() + "° C\u001B[0m\tConsumo elettrico cucina: " + msg.getEnergyConsumption() + " W");
-                    
-                    else //Qui ho raggiunto la temperatura desiderata
+                    else //Qui ho raggiunto la temperatura desiderata; Manda magari messaggio per segnalare fine
                         System.out.println("Temperatura cucina: \u001B[32m" + msg.getTemperature() + "° C\u001B[0m\tConsumo elettrico cucina: " + msg.getEnergyConsumption() + " W");
-
                 }
 				this.kitchenCurrentTemperature = msg.getTemperature();
 				break;
