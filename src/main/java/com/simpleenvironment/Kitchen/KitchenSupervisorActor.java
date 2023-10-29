@@ -83,6 +83,7 @@ public class KitchenSupervisorActor extends AbstractActor {
 			this.kitchenTemperatureSensorActor.tell(new TemperatureMessage(msg.getTemperature(), this.HVACConsumption, Room.KITCHEN, Appliance.HVAC, true), self());
 		}
 		if(msg.getAppliance().equals(Appliance.TEMPERATURE_SENSOR)){
+			System.out.println("Etrato nell'ultimo if");
 			TemperatureMessage toSend = new TemperatureMessage(msg.getTemperature(), (this.sensorConsumption + this.HVACConsumption), Room.KITCHEN, Appliance.KITCHEN_SUPERVISOR, msg.isFirstMeasure());
 			controlPanelActor.tell(toSend, self());
 		}

@@ -20,6 +20,10 @@ public class ServerActor extends AbstractActor {
 
     private int kitchenCurrentTemperature;
 	private int bedroomCurrentTemperature;
+
+    private int kitchenCurrentConsumption;
+    private int bedroomCurrentConsumption;
+    
     private int desiredTemperature;
 
     private ActorSystem system;
@@ -27,9 +31,16 @@ public class ServerActor extends AbstractActor {
     private ActorSelection controlPanelActor;
     private ActorSelection kitchenSupervisorActor;
 
+    private static final boolean RESET = true;
+    private static final boolean SET = false;
+
     public ServerActor(){
         this.kitchenCurrentTemperature = -1;
 		this.bedroomCurrentTemperature = -1;
+
+        this.kitchenCurrentConsumption = 0;
+		this.bedroomCurrentConsumption = 0;
+
         this.kitchenHVACOn = false;
     }
 
@@ -80,18 +91,24 @@ public class ServerActor extends AbstractActor {
                     else {
                         //Qui ho raggiunto la temperatura desiderata; Manda magari messaggio per segnalare fine
                         System.out.print("Temperatura cucina: \u001B[32m" + msg.getTemperature() + "° C\u001B[0m");
-                        reachedTemperature("Cucina");
+                        System.out.println("\tConsumo elettrico cucina: \u001B[33m" + msg.getEnergyConsumption() + " W\u001B[0m");
+                        this.kitchenCurrentTemperature = msg.getTemperature();
+                        this.kitchenCurrentConsumption = msg.getEnergyConsumption();
+                        reachedTemperature("cucina");
+                        return;
                     }
                     System.out.println("\tConsumo elettrico cucina: \u001B[33m" + msg.getEnergyConsumption() + " W\u001B[0m");
                 }
+
 				this.kitchenCurrentTemperature = msg.getTemperature();
+                this.kitchenCurrentConsumption = msg.getEnergyConsumption();
 
                 if(!kitchenHVACOn){
                     boolean wantsAirConditioning = airConditioning();
                     if(wantsAirConditioning){
                         kitchenHVACOn = true;
-                        this.desiredTemperature = setTemperature();
-                        kitchenSupervisorActor.tell(new SimpleMessage(desiredTemperature, Type.DESIRED_TEMPERATURE), self());
+                        this.desiredTemperature = setTemperature(SET);
+                        this.kitchenSupervisorActor.tell(new SimpleMessage(desiredTemperature, Type.DESIRED_TEMPERATURE), self());
                     }
                 }
 
@@ -130,22 +147,42 @@ public class ServerActor extends AbstractActor {
         return choice;
     }
 
-    private static int setTemperature(){
+    private int setTemperature(boolean resetting){
         System.out.print("Quale temperatura (°C) vuoi?\u001B[32m\t");
         Scanner scanner = new Scanner(System.in);
-        int desiredTemperature = scanner.nextInt();
+        this.desiredTemperature = scanner.nextInt();
         System.out.println("\u001B[0m");
+        if(resetting)
+            this.kitchenSupervisorActor.tell(new SimpleMessage(desiredTemperature, Type.DESIRED_TEMPERATURE), self());
         return desiredTemperature;
     }
 
-    private static int reachedTemperature(String environment){
-        System.out.print("L'ambiente " + environment + " ha raggiunto la temperatura desiderata. Cosa desideri fare?");
+    private int reachedTemperature(String environment){
+        System.out.println("\nL'ambiente " + environment + " ha raggiunto la temperatura di \u001B[32m" + this.kitchenCurrentTemperature + "° C\u001B[0m. Cosa desideri fare?");
         System.out.println("1 -> mantenere la temperatura desiderata\n2 -> spegnere il climatizzatore\n3 -> impostare una temperatura diversa.");
         Scanner scanner = new Scanner(System.in);
         int choice = scanner.nextInt();
-        
-        //Ripartire da quiii (Committa prima se vuoi)
-
+        System.out.print("\nTemperatura cucina: " + this.kitchenCurrentTemperature + "° C");
+        System.out.println("\tConsumo elettrico cucina: " + this.kitchenCurrentConsumption + " W");
+        switch(choice){
+            case 1:
+                System.out.println("Vuoi proseguire con un altro ambiente? (y/n)");
+                String choiceString = scanner.next();
+                if(choiceString.equalsIgnoreCase("y")){
+                    kitchenHVACOn = false;
+                    start();
+                }
+                else
+                    return 0;
+                break;
+            case 2:
+                break;
+            case 3:
+                setTemperature(RESET);
+                break;
+            default:
+                break;
+        }
         return choice;
     }
     
