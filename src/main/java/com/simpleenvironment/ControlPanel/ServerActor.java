@@ -175,11 +175,12 @@ public class ServerActor extends AbstractActor {
         }
     }
 
-    private static int showCli() {
+    private int showCli() {
+        System.out.println("\nCONSUMO TOTALE ATTUALE: \u001B[33m" + (this.bedroomCurrentConsumption + this.kitchenCurrentConsumption) + " W\u001B[0m\n");
         System.out.println("Scegli la stanza: \n1. Cucina\n2. Camera da letto\n3. Salotto");
         Scanner scanner = new Scanner(System.in);
         int choice = scanner.nextInt();
-        System.out.println();
+        System.out.println("\n");
         return choice;
     }
 
@@ -257,7 +258,7 @@ public class ServerActor extends AbstractActor {
             System.out.println("\tConsumo elettrico cucina: " + this.kitchenCurrentConsumption + " W");
             switch(choice){
                 case 1:
-                    System.out.println("Vuoi proseguire con un altro ambiente? (y/n)");
+                    System.out.print("Vuoi proseguire con un altro ambiente? (y/n)");
                     String choiceString = scanner.next();
                     if(choiceString.equalsIgnoreCase("y")){
                         kitchenHVACOn = false;
