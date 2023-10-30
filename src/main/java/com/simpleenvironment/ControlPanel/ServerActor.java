@@ -17,6 +17,9 @@ public class ServerActor extends AbstractActor {
     private static final int KITCHEN = 1;
 
     private boolean kitchenHVACOn;
+    // private boolean kitchenHVACSelectable = true;
+
+    private int kitchenInitialTemperature;
 
     private int kitchenCurrentTemperature;
 	private int bedroomCurrentTemperature;
@@ -82,8 +85,10 @@ public class ServerActor extends AbstractActor {
 		switch(msg.getRoom()){
 			case KITCHEN:
 				if(msg.isFirstMeasure() || msg.getTemperature() != this.kitchenCurrentTemperature){
-                    if(msg.isFirstMeasure()) 
+                    if(msg.isFirstMeasure()) {
+                        this.kitchenInitialTemperature = msg.getTemperature();
                         System.out.print("Temperatura cucina: "/*\u001B[33m"*/ + msg.getTemperature() + "° C\u001B[0m");  
+                    }
                     else if(msg.getTemperature() > this.kitchenCurrentTemperature && msg.getTemperature() != this.desiredTemperature)
                         System.out.print("Temperatura cucina: \u001B[31m" + msg.getTemperature() + "° C\u001B[0m"); 
                     else if(msg.getTemperature() < this.kitchenCurrentTemperature && msg.getTemperature() != this.desiredTemperature)
@@ -109,6 +114,10 @@ public class ServerActor extends AbstractActor {
                         kitchenHVACOn = true;
                         this.desiredTemperature = setTemperature(SET);
                         this.kitchenSupervisorActor.tell(new SimpleMessage(desiredTemperature, Type.DESIRED_TEMPERATURE), self());
+                    }
+                    else{
+                        System.out.println();
+                        start();
                     }
                 }
 
@@ -144,6 +153,7 @@ public class ServerActor extends AbstractActor {
         Scanner scanner = new Scanner(System.in);
         String answer = scanner.next();
         choice = (answer.equalsIgnoreCase("y")) ? true : false;
+        
         return choice;
     }
 
@@ -159,7 +169,7 @@ public class ServerActor extends AbstractActor {
 
     private int reachedTemperature(String environment){
         System.out.println("\nL'ambiente " + environment + " ha raggiunto la temperatura di \u001B[32m" + this.kitchenCurrentTemperature + "° C\u001B[0m. Cosa desideri fare?");
-        System.out.println("1 -> mantenere la temperatura desiderata\n2 -> spegnere il climatizzatore\n3 -> impostare una temperatura diversa.");
+        System.out.println("1 -> mantenere la temperatura.\n2 -> spegnere il climatizzatore\n3 -> impostare una temperatura diversa");
         Scanner scanner = new Scanner(System.in);
         int choice = scanner.nextInt();
         System.out.print("\nTemperatura cucina: " + this.kitchenCurrentTemperature + "° C");
@@ -172,10 +182,15 @@ public class ServerActor extends AbstractActor {
                     kitchenHVACOn = false;
                     start();
                 }
-                else
+                else{
+                    System.out.println("Grazie per aver usato SMART HOME.");
+                    system.terminate();
                     return 0;
+                }
                 break;
             case 2:
+                this.desiredTemperature = kitchenInitialTemperature;
+                this.kitchenSupervisorActor.tell(new SimpleMessage(this.kitchenInitialTemperature, Type.STOP_HVAC), self());
                 break;
             case 3:
                 setTemperature(RESET);

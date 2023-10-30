@@ -13,5 +13,6 @@ public enum Type {
     DESIRED_TEMPERATURE,
     SET_TEMPERATURE,
     STOP_SENDING,
+    STOP_HVAC
     /*Altri*/
 };

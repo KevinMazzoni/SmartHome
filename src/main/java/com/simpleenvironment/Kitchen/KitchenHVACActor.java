@@ -54,6 +54,10 @@ public class KitchenHVACActor extends AbstractActor {
                 System.out.println("Sono il KitchenHVACActor e ho ricevuto un DESIRED_TEMPERATURE con temperatura: " + msg.getDesiredTemperature());
                 this.kitchenSupervisorActor.tell(new TemperatureMessage(msg.getDesiredTemperature(), this.energyConsumption, Room.KITCHEN, Appliance.HVAC, FIRST), self());
                 break;
+            case STOP_HVAC:
+                System.out.println("Sono il KitchenHVACActor e ho ricevuto un STOP_HVAC con temperatura: " + msg.getDesiredTemperature());
+                this.kitchenSupervisorActor.tell(new TemperatureMessage(msg.getDesiredTemperature(), 0, Room.KITCHEN, Appliance.HVAC, FIRST), self());
+                break;
             case STOP_SENDING:
                 break;
             default:

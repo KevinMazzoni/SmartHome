@@ -72,13 +72,13 @@ public class KitchenSupervisorActor extends AbstractActor {
 	void onTemperatureMessage(TemperatureMessage msg){
 		System.out.println("Sono il kitchenSupervisorActor! Ho ricevuto un TemperatureMessage con temperatura: " + msg.getTemperature());
 		System.out.println("temperature sensor on: " + this.temperatureSensorOn);
-		System.out.println("HVAC on: " + this.HVACOn);
+		System.out.println("HVAC on: " /*+ this.HVACOn*/);
 		if(!temperatureSensorOn && msg.getAppliance().equals(Appliance.TEMPERATURE_SENSOR)){
 			this.temperatureSensorOn = ON;
 			this.sensorConsumption = msg.getEnergyConsumption();
 		}
-		if(!HVACOn && msg.getAppliance().equals(Appliance.HVAC)){
-			this.HVACOn = ON;
+		if(/*!HVACOn && */msg.getAppliance().equals(Appliance.HVAC)){
+			// this.HVACOn = ON;
 			this.HVACConsumption = msg.getEnergyConsumption();
 			this.kitchenTemperatureSensorActor.tell(new TemperatureMessage(msg.getTemperature(), this.HVACConsumption, Room.KITCHEN, Appliance.HVAC, true), self());
 		}
@@ -112,12 +112,20 @@ public class KitchenSupervisorActor extends AbstractActor {
 				this.kitchenTemperatureSensorActor.tell(new SimpleMessage("Prova tell", Type.INFO_TEMPERATURE), self());
 				break;
 			case DESIRED_TEMPERATURE:
+				// this.HVACOn = false;
 				//Ripartire da qui, gestire un DESIRED_TEMPERATURE da parte del HVACActor
 				System.out.println("Sono il KitchenSupervisorActor, ho ricevuto un DESIRED TEMPERATURE a " + msg.getDesiredTemperature());
 				this.kitchenHVACActor.tell(msg, kitchenHVACActor);
 				//Qui magari mandare un messaggio al ControlPanelActor al corretto avvio del HVAC
-				this.kitchenTemperatureSensorActor.tell(new TemperatureMessage(msg.getDesiredTemperature(), this.HVACConsumption, Room.KITCHEN, Appliance.HVAC, true), self());
+				
+				// this.kitchenTemperatureSensorActor.tell(new TemperatureMessage(msg.getDesiredTemperature(), this.HVACConsumption, Room.KITCHEN, Appliance.HVAC, true), self());
+				
 				// this.kitchenTemperatureSensorActor.tell(new SimpleMessage("Prova invio Simple", Type.INFO), self());
+				// this.kitchenTemperatureSensorActor.tell(new TemperatureMessage(msg.getDesiredTemperature(), this.HVACConsumption, Room.KITCHEN, Appliance.HVAC, true), self());
+				break;
+			case STOP_HVAC:
+				// this.HVACOn = false;
+				this.kitchenHVACActor.tell(msg, self());
 				// this.kitchenTemperatureSensorActor.tell(new TemperatureMessage(msg.getDesiredTemperature(), this.HVACConsumption, Room.KITCHEN, Appliance.HVAC, true), self());
 				break;
 			default:
