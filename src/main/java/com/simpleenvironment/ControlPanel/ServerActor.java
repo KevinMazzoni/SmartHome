@@ -17,7 +17,7 @@ public class ServerActor extends AbstractActor {
     private static final int KITCHEN = 1;
 
     private boolean kitchenHVACOn;
-    // private boolean kitchenHVACSelectable = true;
+    private boolean kitchenHVACOffSelectable;
 
     private int kitchenInitialTemperature;
 
@@ -109,16 +109,7 @@ public class ServerActor extends AbstractActor {
                 this.kitchenCurrentConsumption = msg.getEnergyConsumption();
 
                 if(!kitchenHVACOn){
-                    boolean wantsAirConditioning = airConditioning();
-                    if(wantsAirConditioning){
-                        kitchenHVACOn = true;
-                        this.desiredTemperature = setTemperature(SET);
-                        this.kitchenSupervisorActor.tell(new SimpleMessage(desiredTemperature, Type.DESIRED_TEMPERATURE), self());
-                    }
-                    else{
-                        System.out.println();
-                        start();
-                    }
+                    airConditioningActivating();
                 }
 
 				break;
@@ -147,14 +138,28 @@ public class ServerActor extends AbstractActor {
         return choice;
     }
 
-    private static boolean airConditioning(){
+    private boolean airConditioning(){
         boolean choice;
         System.out.print("\nVuoi accendere il condizionatore? (y/n)\t");
         Scanner scanner = new Scanner(System.in);
         String answer = scanner.next();
         choice = (answer.equalsIgnoreCase("y")) ? true : false;
-        
+        this.kitchenHVACOn = choice;
         return choice;
+    }
+
+    private void airConditioningActivating(){
+        boolean wantsAirConditioning = airConditioning();
+        if(wantsAirConditioning){
+            kitchenHVACOn = true;
+            this.kitchenHVACOffSelectable = true;
+            this.desiredTemperature = setTemperature(SET);
+            this.kitchenSupervisorActor.tell(new SimpleMessage(desiredTemperature, Type.DESIRED_TEMPERATURE), self());
+        }
+        else{
+            System.out.println();
+            start();
+        }
     }
 
     private int setTemperature(boolean resetting){
@@ -189,8 +194,16 @@ public class ServerActor extends AbstractActor {
                 }
                 break;
             case 2:
-                this.desiredTemperature = kitchenInitialTemperature;
-                this.kitchenSupervisorActor.tell(new SimpleMessage(this.kitchenInitialTemperature, Type.STOP_HVAC), self());
+                // kitchenHVACOn = false;
+                if(!this.kitchenHVACOffSelectable){
+                    System.out.println("Il climatizzatore è già spento");
+                    airConditioningActivating();
+                }
+                else {
+                    this.kitchenHVACOffSelectable = false;
+                    this.desiredTemperature = kitchenInitialTemperature;
+                    this.kitchenSupervisorActor.tell(new SimpleMessage(this.kitchenInitialTemperature, Type.STOP_HVAC), self());
+                }
                 break;
             case 3:
                 setTemperature(RESET);
