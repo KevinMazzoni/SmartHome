@@ -4,6 +4,7 @@ public enum Appliance {
     TEMPERATURE_SENSOR,
     HVAC,
     SERVER,
-    KITCHEN_SUPERVISOR
+    KITCHEN_SUPERVISOR,
+    BEDROOM_SUPERVISOR
     /*Altri*/
 };

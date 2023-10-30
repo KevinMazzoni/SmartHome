@@ -12,6 +12,8 @@ public class SimpleMessage implements Serializable {
     private Type type;
     private int desiredTemperature;
 
+    private Room room;
+
     private ActorRef actorRef;
     private Appliance appliance;
 
@@ -40,9 +42,10 @@ public class SimpleMessage implements Serializable {
         this.type = type;
     }
 
-    public SimpleMessage(int desiredTemperature, Type type){
+    public SimpleMessage(int desiredTemperature, Type type, Room room){
         this.desiredTemperature = desiredTemperature;
         this.type = type;
+        this.room = room;
     }
 
     public String getMessage(){
@@ -55,6 +58,10 @@ public class SimpleMessage implements Serializable {
 
     public Type getType(){
         return this.type;
+    }
+
+    public Room getRoom(){
+        return this.room;
     }
 
     public Appliance getAppliance(){
