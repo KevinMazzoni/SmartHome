@@ -18,6 +18,8 @@ import com.typesafe.config.ConfigFactory;
 
 import java.util.concurrent.TimeoutException;
 
+import java.time.Duration;
+
 public class Bedroom {
 
     public static void main(String[] args) {
@@ -62,6 +64,8 @@ public class Bedroom {
 
             //Invio al bedroomSupervsorActor il riferimento al ControlPanelActor
             bedroomSupervisorActor.tell(new SimpleMessage(controlPanelActor, Type.INFO_CONTROLPANEL), ActorRef.noSender());
+
+            system.scheduler().scheduleOnce(Duration.ofMillis(3000), bedroomTemperatureSensorActor, new SimpleMessage("Errore invio", Type.ERROR), system.dispatcher(), ActorRef.noSender());
 
         }
         catch(TimeoutException te){
