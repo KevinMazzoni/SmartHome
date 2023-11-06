@@ -71,8 +71,8 @@ public class BedroomSupervisorActor extends AbstractActor {
 
 	void onTemperatureMessage(TemperatureMessage msg){
 		System.out.println("Sono il bedroomSupervisorActor! Ho ricevuto un TemperatureMessage con temperatura: " + msg.getTemperature());
-		System.out.println("temperature sensor on: " + this.temperatureSensorOn);
-		System.out.println("HVAC on: " /*+ this.HVACOn*/);
+		// System.out.println("temperature sensor on: " + this.temperatureSensorOn);
+		// System.out.println("HVAC on: " /*+ this.HVACOn*/);
 		if(!temperatureSensorOn && msg.getAppliance().equals(Appliance.TEMPERATURE_SENSOR)){
 			this.temperatureSensorOn = ON;
 			this.sensorConsumption = msg.getEnergyConsumption();
@@ -83,7 +83,6 @@ public class BedroomSupervisorActor extends AbstractActor {
 			this.bedroomTemperatureSensorActor.tell(new TemperatureMessage(msg.getTemperature(), this.HVACConsumption, Room.BEDROOM, Appliance.HVAC, true), self());
 		}
 		if(msg.getAppliance().equals(Appliance.TEMPERATURE_SENSOR)){
-			System.out.println("Etrato nell'ultimo if");
 			TemperatureMessage toSend = new TemperatureMessage(msg.getTemperature(), (this.sensorConsumption + this.HVACConsumption), Room.BEDROOM, Appliance.BEDROOM_SUPERVISOR, msg.isFirstMeasure());
 			controlPanelActor.tell(toSend, self());
 		}
