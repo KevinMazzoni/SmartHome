@@ -24,6 +24,9 @@ public class ServerActor extends AbstractActor {
     private boolean bedroomHVACOn;
     private boolean bedroomHVACOffSelectable;
 
+    private boolean kitchenEnvironment;
+    private boolean bedroomEnvironment;
+
     private int kitchenInitialTemperature;
     private int bedroomInitialTemperature;
 
@@ -54,6 +57,9 @@ public class ServerActor extends AbstractActor {
 
         this.kitchenHVACOn = false;
         this.bedroomHVACOn = false;
+
+        this.kitchenEnvironment = true;
+        this.bedroomEnvironment = true;
     }
 
     @Override
@@ -99,7 +105,10 @@ public class ServerActor extends AbstractActor {
 			case KITCHEN:
 				if(msg.isFirstMeasure() || msg.getTemperature() != this.kitchenCurrentTemperature){
                     if(msg.isFirstMeasure()) {
-                        this.kitchenInitialTemperature = msg.getTemperature();
+                        if(kitchenEnvironment){
+                            this.kitchenInitialTemperature = msg.getTemperature();
+                            kitchenEnvironment = false;
+                        }
                         System.out.print("Temperatura cucina: "/*\u001B[33m"*/ + msg.getTemperature() + "° C\u001B[0m");  
                     }
                     else if(msg.getTemperature() > this.kitchenCurrentTemperature && msg.getTemperature() != this.kitchenDesiredTemperature)
@@ -121,15 +130,22 @@ public class ServerActor extends AbstractActor {
 				this.kitchenCurrentTemperature = msg.getTemperature();
                 this.kitchenCurrentConsumption = msg.getEnergyConsumption();
 
-                if(!kitchenHVACOn){
+                if(msg.isFirstMeasure() && !kitchenHVACOn){
                     airConditioningActivating(Room.KITCHEN);
+                }
+                else{
+                    if(msg.isFirstMeasure())
+                        reachedTemperature(Room.KITCHEN);
                 }
 
 				break;
 			case BEDROOM:
 				if(msg.isFirstMeasure() || msg.getTemperature() != this.bedroomCurrentTemperature){
                     if(msg.isFirstMeasure()) {
-                        this.bedroomInitialTemperature = msg.getTemperature();
+                        if(bedroomEnvironment){
+                            this.bedroomInitialTemperature = msg.getTemperature();
+                            bedroomEnvironment = false;
+                        }
                         System.out.print("Temperatura camera da letto: "/*\u001B[33m"*/ + msg.getTemperature() + "° C\u001B[0m");  
                     }
                     else if(msg.getTemperature() > this.bedroomCurrentTemperature && msg.getTemperature() != this.bedroomDesiredTemperature)
@@ -151,8 +167,12 @@ public class ServerActor extends AbstractActor {
 				this.bedroomCurrentTemperature = msg.getTemperature();
                 this.bedroomCurrentConsumption = msg.getEnergyConsumption();
 
-                if(!bedroomHVACOn){
+                if(msg.isFirstMeasure() && !bedroomHVACOn){
                     airConditioningActivating(Room.BEDROOM);
+                }
+                else{
+                    if(msg.isFirstMeasure())
+                        reachedTemperature(Room.BEDROOM);
                 }
 
 				break;
@@ -201,7 +221,7 @@ public class ServerActor extends AbstractActor {
         if(room.equals(Room.KITCHEN)){
             boolean wantsAirConditioning = airConditioning(room);
             if(wantsAirConditioning){
-                kitchenHVACOn = true;
+                // kitchenHVACOn = true;
                 this.kitchenHVACOffSelectable = true;
                 this.kitchenDesiredTemperature = setTemperature(SET, Room.KITCHEN);
                 this.kitchenSupervisorActor.tell(new SimpleMessage(kitchenDesiredTemperature, Type.DESIRED_TEMPERATURE, Room.KITCHEN), self());
@@ -214,7 +234,7 @@ public class ServerActor extends AbstractActor {
         else if(room.equals(Room.BEDROOM)){
             boolean wantsAirConditioning = airConditioning(room);
             if(wantsAirConditioning){
-                bedroomHVACOn = true;
+                // bedroomHVACOn = true;
                 this.bedroomHVACOffSelectable = true;
                 this.bedroomDesiredTemperature = setTemperature(SET, Room.BEDROOM);
                 this.bedroomSupervisorActor.tell(new SimpleMessage(bedroomDesiredTemperature, Type.DESIRED_TEMPERATURE, Room.BEDROOM), self());
@@ -251,7 +271,10 @@ public class ServerActor extends AbstractActor {
     private int reachedTemperature(Room room){
         if(room.equals(Room.KITCHEN)){
             System.out.println("\nL'ambiente cucina ha raggiunto la temperatura di \u001B[32m" + this.kitchenCurrentTemperature + "° C\u001B[0m. Cosa desideri fare?");
-            System.out.println("1 -> mantenere la temperatura.\n2 -> spegnere il climatizzatore\n3 -> impostare una temperatura diversa");
+            if(kitchenHVACOn)
+                System.out.println("1 -> mantenere la temperatura.\n2 -> spegnere il climatizzatore\n3 -> impostare una temperatura diversa");
+            else
+                System.out.println("1 -> mantenere la temperatura.\n3 -> impostare una temperatura diversa");
             Scanner scanner = new Scanner(System.in);
             int choice = scanner.nextInt();
             System.out.print("\nTemperatura cucina: " + this.kitchenCurrentTemperature + "° C");
@@ -261,7 +284,7 @@ public class ServerActor extends AbstractActor {
                     System.out.print("Vuoi proseguire con un altro ambiente? (y/n)");
                     String choiceString = scanner.next();
                     if(choiceString.equalsIgnoreCase("y")){
-                        kitchenHVACOn = false;
+                        // kitchenHVACOn = false;
                         start();
                     }
                     else{
@@ -271,18 +294,29 @@ public class ServerActor extends AbstractActor {
                     }
                     break;
                 case 2:
+                    //Così era il commit prima
                     // kitchenHVACOn = false;
-                    if(!this.kitchenHVACOffSelectable){
-                        System.out.println("Il climatizzatore è già spento");
-                        airConditioningActivating(Room.KITCHEN);
-                    }
-                    else {
-                        this.kitchenHVACOffSelectable = false;
+                    // if(!this.kitchenHVACOffSelectable){
+                    //     System.out.println("Il climatizzatore è già spento");
+                    //     airConditioningActivating(Room.KITCHEN);
+                    // }
+                    // else {
+                    //     this.kitchenHVACOffSelectable = false;
+                    //     this.kitchenDesiredTemperature = kitchenInitialTemperature;
+                    //     this.kitchenSupervisorActor.tell(new SimpleMessage(this.kitchenInitialTemperature, Type.STOP_HVAC, Room.KITCHEN), self());
+                    // }
+                    if(this.kitchenHVACOn){
+                        this.kitchenHVACOn = false;
                         this.kitchenDesiredTemperature = kitchenInitialTemperature;
                         this.kitchenSupervisorActor.tell(new SimpleMessage(this.kitchenInitialTemperature, Type.STOP_HVAC, Room.KITCHEN), self());
                     }
+                    else{
+                        System.out.println("Il climatizzatore è già spento");
+                        airConditioningActivating(Room.KITCHEN);
+                    }
                     break;
                 case 3:
+                    this.kitchenHVACOn = true;
                     setTemperature(RESET, Room.KITCHEN);
                     break;
                 default:
@@ -292,7 +326,10 @@ public class ServerActor extends AbstractActor {
         }
         else if(room.equals(Room.BEDROOM)){
             System.out.println("\nL'ambiente camera da letto ha raggiunto la temperatura di \u001B[32m" + this.bedroomCurrentTemperature + "° C\u001B[0m. Cosa desideri fare?");
-            System.out.println("1 -> mantenere la temperatura.\n2 -> spegnere il climatizzatore\n3 -> impostare una temperatura diversa");
+            if(bedroomHVACOn)
+                System.out.println("1 -> mantenere la temperatura.\n2 -> spegnere il climatizzatore\n3 -> impostare una temperatura diversa");
+            else
+                System.out.println("1 -> mantenere la temperatura.\n3 -> impostare una temperatura diversa");
             Scanner scanner = new Scanner(System.in);
             int choice = scanner.nextInt();
             System.out.print("\nTemperatura camera da letto: " + this.bedroomCurrentTemperature + "° C");
@@ -302,7 +339,7 @@ public class ServerActor extends AbstractActor {
                     System.out.println("Vuoi proseguire con un altro ambiente? (y/n)");
                     String choiceString = scanner.next();
                     if(choiceString.equalsIgnoreCase("y")){
-                        bedroomHVACOn = false;
+                        // bedroomHVACOn = false;
                         start();
                     }
                     else{
@@ -312,18 +349,29 @@ public class ServerActor extends AbstractActor {
                     }
                     break;
                 case 2:
+                    //Commit precedente
                     // bedroomHVACOn = false;
-                    if(!this.bedroomHVACOffSelectable){
-                        System.out.println("Il climatizzatore è già spento");
-                        airConditioningActivating(Room.BEDROOM);
-                    }
-                    else {
-                        this.bedroomHVACOffSelectable = false;
+                    // if(!this.bedroomHVACOffSelectable){
+                    //     System.out.println("Il climatizzatore è già spento");
+                    //     airConditioningActivating(Room.BEDROOM);
+                    // }
+                    // else {
+                    //     this.bedroomHVACOffSelectable = false;
+                    //     this.bedroomDesiredTemperature = bedroomInitialTemperature;
+                    //     this.bedroomSupervisorActor.tell(new SimpleMessage(this.bedroomInitialTemperature, Type.STOP_HVAC, Room.BEDROOM), self());
+                    // }
+                    if(this.bedroomHVACOn){
+                        this.bedroomHVACOn = false;
                         this.bedroomDesiredTemperature = bedroomInitialTemperature;
                         this.bedroomSupervisorActor.tell(new SimpleMessage(this.bedroomInitialTemperature, Type.STOP_HVAC, Room.BEDROOM), self());
                     }
+                    else{
+                        System.out.println("Il climatizzatore è già spento");
+                        airConditioningActivating(Room.BEDROOM);
+                    }
                     break;
                 case 3:
+                    this.bedroomHVACOn = true;
                     setTemperature(RESET, Room.BEDROOM);
                     break;
                 default:
