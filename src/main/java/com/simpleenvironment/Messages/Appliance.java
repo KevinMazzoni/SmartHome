@@ -5,6 +5,8 @@ public enum Appliance {
     HVAC,
     SERVER,
     KITCHEN_SUPERVISOR,
-    BEDROOM_SUPERVISOR
+    BEDROOM_SUPERVISOR,
+    LIVINGROOM_SUPERVISOR,
+    TV
     /*Altri*/
 };
