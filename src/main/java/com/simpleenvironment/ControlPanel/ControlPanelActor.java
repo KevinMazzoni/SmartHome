@@ -70,6 +70,8 @@ public class ControlPanelActor extends AbstractActor {
 				// System.out.println("Sto settando il childActor a: " + msg.getChildActor());
 				// this.serverActor.tell(new SimpleMessage("Prova di invio di un simplemessage da ControlPanelActor a ServerActor", Type.INFO), serverActor);
 				break;
+			case TV_CONSUMPTION:
+				this.serverActor.tell(msg, self());
 			default:
 				break;
 		}

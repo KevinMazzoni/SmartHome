@@ -77,6 +77,14 @@ public class LivingroomSupervisorActor extends AbstractActor {
 				System.out.println("Sono il LivingroomSupervisorActor, ho ricevuto un INFO_CONTROLPANEL; getcontrolpanelref(): " + msg.getControlPanelRef());
 				this.controlPanelActor = msg.getControlPanelRef();
 				break;
+			case INFO_CONSUMPTION:
+				System.out.println("Sono il LivingroomSupervisorActor, ho ricevuto un INFO_CONSUMPTION: " + msg.getMessage());
+				this.tvActor.tell(msg, self());
+				break;
+			case TV_CONSUMPTION:
+				System.out.println("Sono il LivingroomSupervisorActor, ho ricevuto un TV_CONSUMPTION: " + msg.getEnergyConsumption());
+				this.controlPanelActor.tell(msg, self());
+				break;
 			default:
 				break;
 		}

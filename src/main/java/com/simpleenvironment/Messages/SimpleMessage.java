@@ -91,4 +91,8 @@ public class SimpleMessage implements Serializable {
     public int getDesiredTemperature(){
         return this.desiredTemperature;
     }
+
+    public int getEnergyConsumption(){
+        return this.desiredTemperature;
+    }
 }

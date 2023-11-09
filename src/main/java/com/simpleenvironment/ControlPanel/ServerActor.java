@@ -17,6 +17,7 @@ public class ServerActor extends AbstractActor {
 
     private static final int KITCHEN = 1;
     private static final int BEDROOM = 2;
+    private static final int LIVINGROOM = 3;
 
     private boolean kitchenHVACOn;
     private boolean kitchenHVACOffSelectable;
@@ -44,6 +45,7 @@ public class ServerActor extends AbstractActor {
     private ActorSelection controlPanelActor;
     private ActorSelection kitchenSupervisorActor;
     private ActorSelection bedroomSupervisorActor;
+    private ActorSelection livingroomSupervisorActor;
 
     private static final boolean RESET = true;
     private static final boolean SET = false;
@@ -82,6 +84,8 @@ public class ServerActor extends AbstractActor {
     }
 
     void onSimpleMessage(SimpleMessage msg) throws Exception {
+        Type messageType = msg.getType();
+        System.out.println("MEssage type: " + messageType);
         if(msg.getType().equals(Type.INFO_ACTOR_SYSTEM))
             this.system = msg.getActorSystem();
         if(msg.getType().equals(Type.INFO_CONTROLPANEL))
@@ -96,6 +100,8 @@ public class ServerActor extends AbstractActor {
             start();
         if(msg.getType().equals(Type.INFO))
             System.out.println("Ricevuto INFO message: " + msg.getMessage());
+        if(msg.getType().equals(Type.TV_CONSUMPTION))
+            System.out.println("Ricevuto TV_CONSUMPTION: " + msg.getEnergyConsumption());
     }
 
     void onTemperatureMessage(TemperatureMessage msg) throws Exception {
@@ -192,6 +198,11 @@ public class ServerActor extends AbstractActor {
         if(environment == BEDROOM){
             bedroomSupervisorActor = system.actorSelection("akka://ServerSystem@127.0.0.1:2554/user/BedroomSupervisorActor");
             bedroomSupervisorActor.tell(new SimpleMessage("INFO_TEMPERATURE", Type.INFO_TEMPERATURE), ActorRef.noSender());
+        }
+
+        if(environment == LIVINGROOM){
+            livingroomSupervisorActor = system.actorSelection("akka://ServerSystem@127.0.0.1:2555/user/LivingroomSupervisorActor");
+            livingroomSupervisorActor.tell(new SimpleMessage("INFO_CONSUMPTION_TELEVISION", Type.INFO_CONSUMPTION), ActorRef.noSender());
         }
     }
 
