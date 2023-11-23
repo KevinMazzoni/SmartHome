@@ -40,6 +40,9 @@ public class ServerActor extends AbstractActor {
     private boolean kitchenRunning = false;
 	private boolean bedroomRunning = false;
 
+    private boolean workingOnKitchen = false;
+    private boolean workingOnBedroom = false;
+
     private int kitchenInitialTemperature;
     private int bedroomInitialTemperature;
 
@@ -141,10 +144,22 @@ public class ServerActor extends AbstractActor {
         if(msg.getType().equals(Type.KITCHEN_OFF)){
             System.out.println("Kitchen is OFF!!!");
             this.kitchenRunning = false;
+            this.kitchenCurrentConsumption = 0;
+            if(workingOnKitchen){
+                System.out.println("\u001B[31mLa cucina ha smesso improvvisamente di funzionare! Prova con un altro ambiente\u001B[0m");
+                this.workingOnKitchen = false;
+                start();
+            }
         }
         if(msg.getType().equals(Type.BEDROOM_OFF)){
             System.out.println("Bedroom is OFF!!!");
             this.bedroomRunning = false;
+            this.bedroomCurrentConsumption = 0;
+            if(workingOnBedroom){
+                System.out.println("\u001B[31mLa camera da letto ha smesso improvvisamente di funzionare! Prova con un altro ambiente\u001B[0m");
+                this.workingOnBedroom = false;
+                start();
+            }
         }
         
     }
@@ -239,17 +254,19 @@ public class ServerActor extends AbstractActor {
         this.environment = msg.getEnvironmentChoice();
 
         if(environment == KITCHEN && !this.kitchenRunning || environment == BEDROOM && !this.bedroomRunning){
-            System.out.println("L'ambiente selezionato ha subìto un crash improvviso! Prova con un altro ambiente");
+            System.out.println("\u001B[31mL'ambiente selezionato ha subìto un crash improvviso! Prova con un altro ambiente\u001B[0m");
             // return;
             start();
         }
         
         if(environment == KITCHEN){
+            this.workingOnKitchen = true;
             kitchenSupervisorActor = system.actorSelection("akka://ServerSystem@127.0.0.1:2553/user/KitchenSupervisorActor");
             kitchenSupervisorActor.tell(new SimpleMessage("INFO_TEMPERATURE", Type.INFO_TEMPERATURE), ActorRef.noSender());
         }
 
         if(environment == BEDROOM){
+            this.workingOnBedroom = true;
             bedroomSupervisorActor = system.actorSelection("akka://ServerSystem@127.0.0.1:2554/user/BedroomSupervisorActor");
             bedroomSupervisorActor.tell(new SimpleMessage("INFO_TEMPERATURE", Type.INFO_TEMPERATURE), ActorRef.noSender());
         }
@@ -314,10 +331,10 @@ public class ServerActor extends AbstractActor {
 
     private void start() {
         // environment = showCli();
-        System.out.println("\nCONSUMO TOTALE ATTUALE: \u001B[33m" + (this.bedroomCurrentConsumption + this.kitchenCurrentConsumption) + " W\u001B[0m\n");
 
-        this.userInputActor.tell(new SimpleMessage("INPUT", Type.INPUT_ENVIRONMENT), self());
+        this.userInputActor.tell(new SimpleMessage((this.bedroomCurrentConsumption + this.kitchenCurrentConsumption), Type.INPUT_ENVIRONMENT), self());
 
+        // System.out.println("\nCONSUMO TOTALE ATTUALE: \u001B[33m" + (this.bedroomCurrentConsumption + this.kitchenCurrentConsumption) + " W\u001B[0m\n");
         // System.out.println("ENVIRONMENT: " + environment);
 
         // while((environment == KITCHEN && !this.kitchenRunning) || (environment == BEDROOM && !this.bedroomRunning)){
@@ -498,6 +515,7 @@ public class ServerActor extends AbstractActor {
                     String choiceString = scanner.next();
                     if(choiceString.equalsIgnoreCase("y")){
                         // kitchenHVACOn = false;
+                        this.workingOnKitchen = false;
                         start();
                     }
                     else{
@@ -552,6 +570,7 @@ public class ServerActor extends AbstractActor {
                     System.out.println("Vuoi proseguire con un altro ambiente? (y/n)");
                     String choiceString = scanner.next();
                     if(choiceString.equalsIgnoreCase("y")){
+                        this.workingOnBedroom = false;
                         // bedroomHVACOn = false;
                         start();
                     }

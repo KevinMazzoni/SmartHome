@@ -32,7 +32,7 @@ public class UserInputActor extends AbstractActor {
     private void handleUserInput(SimpleMessage msg) {
         if(msg.getType().equals(Type.INPUT_ENVIRONMENT)){
             // System.out.println("Ricevuto Type.INPUT");
-            int choice = showCli();
+            int choice = showCli(msg.getEnergyConsumption());
             context().parent().tell(new SimpleMessage(choice, Type.INPUT_ENVIRONMENT), self());
         }
         if(msg.getType().equals(Type.INPUT_HVAC)){
@@ -55,8 +55,8 @@ public class UserInputActor extends AbstractActor {
         // // Altri casi di gestione dell'input utente
     }
 
-    private int showCli() {
-        // System.out.println("\nCONSUMO TOTALE ATTUALE: \u001B[33m" + (this.bedroomCurrentConsumption + this.kitchenCurrentConsumption) + " W\u001B[0m\n");
+    private int showCli(int energyConsumption) {
+        System.out.println("\nCONSUMO TOTALE ATTUALE: \u001B[33m" + energyConsumption + " W\u001B[0m\n");
         System.out.println("Scegli la stanza: \n1. Cucina\n2. Camera da letto\n3. Salotto");
         int choice = scanner.nextInt();
         System.out.println("\n");
