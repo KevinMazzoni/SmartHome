@@ -21,7 +21,12 @@
         </dependency>
         <dependency>
             <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-cluster_2.13</artifactId> <!-- Usa _2.13 invece di _2.12 -->
+            <artifactId>akka-cluster_2.13</artifactId>
+            <version>${akka.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-cluster-tools_2.13</artifactId>
             <version>${akka.version}</version>
         </dependency>
         <dependency>

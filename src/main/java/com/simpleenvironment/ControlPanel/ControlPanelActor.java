@@ -11,6 +11,15 @@ import akka.actor.ActorRef;
 import akka.actor.OneForOneStrategy;
 import akka.actor.Props;
 import akka.actor.SupervisorStrategy;
+import akka.cluster.Cluster;
+import akka.cluster.ClusterEvent;
+import akka.cluster.ClusterEvent.CurrentClusterState;
+import akka.cluster.ClusterEvent.MemberEvent;
+import akka.cluster.ClusterEvent.MemberExited;
+import akka.cluster.ClusterEvent.MemberJoined;
+import akka.cluster.ClusterEvent.MemberRemoved;
+import akka.cluster.ClusterEvent.MemberUp;
+import akka.cluster.ClusterEvent.UnreachableMember;
 import akka.japi.pf.DeciderBuilder;
 
 public class ControlPanelActor extends AbstractActor {
@@ -19,6 +28,11 @@ public class ControlPanelActor extends AbstractActor {
 
 	private int kitchenCurrentTemperature;
 	private int bedroomCurrentTemperature;
+
+	private boolean kitchenRunning = false;
+	private boolean bedroomRunning = false;
+
+	private Cluster cluster = Cluster.get(getContext().getSystem());
 
      // #strategy
     private static SupervisorStrategy strategy =
@@ -31,6 +45,19 @@ public class ControlPanelActor extends AbstractActor {
     @Override
     public SupervisorStrategy supervisorStrategy() {
       return strategy;
+    }
+
+	@Override
+    public void preStart() {
+        // Sottoscrivi questo attore a ricevere notifiche sui cambiamenti dei membri del cluster
+        // cluster.subscribe(getSelf(), MemberEvent.class);
+        cluster.subscribe(getSelf(), ClusterEvent.initialStateAsEvents(), MemberEvent.class, UnreachableMember.class);
+    }
+
+    @Override
+    public void postStop() {
+        // Annulla la registrazione quando l'attore viene fermato
+        cluster.unsubscribe(getSelf());
     }
 
 	public ControlPanelActor() {
@@ -52,6 +79,59 @@ public class ControlPanelActor extends AbstractActor {
 				  	.match(String.class, message -> {
                     	System.out.println("ControlPanelActor ha ricevuto il messaggio: " + message);
                 	})
+					.match(CurrentClusterState.class, state -> {
+                    	// Ricevi una notifica sullo stato attuale del cluster
+						System.out.println("Current members: " + state.getMembers());
+					})
+					.match(MemberUp.class, memberUp -> {
+						// Ricevi una notifica quando un membro si unisce al cluster
+						// System.out.println("Member is Up: " + memberUp.member().address());
+						
+					})
+					.match(MemberRemoved.class, memberRemoved -> {
+						// Ricevi una notifica quando un membro viene rimosso dal cluster
+						System.out.println("Member is Removed: " + memberRemoved.member().address());
+					})
+					.match(MemberEvent.class, memberEvent -> {
+						// Altri tipi di eventi relativi ai membri del cluster possono essere gestiti qui
+						if (memberEvent instanceof MemberExited) {
+							// System.out.println("Member is Exited: " + ((MemberExited) memberEvent).member());
+							switch(((MemberExited) memberEvent).member().address().toString()){
+								case "akka://ServerSystem@127.0.0.1:2553":
+									System.out.println("Kitchen exiting");
+									this.kitchenRunning = false;
+									this.serverActor.tell(new SimpleMessage("Kitchen exiting", Type.KITCHEN_OFF), self());
+									break;
+								case "akka://ServerSystem@127.0.0.1:2554":
+									System.out.println("Bedroom exiting");
+									this.bedroomRunning = false;
+									this.serverActor.tell(new SimpleMessage("Bedroom exiting", Type.BEDROOM_OFF), self());
+									break;
+								default:
+									System.out.println("NOT_RECOGNIZED up and running");
+									break;
+							}
+						} else if (memberEvent instanceof MemberJoined) {
+							// System.out.println("Member Joined: " + ((MemberJoined) memberEvent).member());
+							switch(((MemberJoined) memberEvent).member().address().toString()){
+								case "akka://ServerSystem@127.0.0.1:2553":
+									System.out.println("Kitchen up and running");
+									this.kitchenRunning = true;
+									this.serverActor.tell(new SimpleMessage("Kitchen active and running", Type.KITCHEN_ON), self());
+									break;
+								case "akka://ServerSystem@127.0.0.1:2554":
+									System.out.println("Bedroom up and running");
+									this.bedroomRunning = true;
+									this.serverActor.tell(new SimpleMessage("Bedroom active and running", Type.BEDROOM_ON), self());
+									break;
+								default:
+									System.out.println("NOT_RECOGNIZED up and running");
+									break;
+							}
+						} else if (memberEvent instanceof MemberEvent) {
+							// Gestisci altri tipi di eventi se necessario
+						}
+					})
 		          	.build();
 	}
 
@@ -67,6 +147,7 @@ public class ControlPanelActor extends AbstractActor {
 				break;
 			case INFO_CHILD:
 				this.serverActor = msg.getChildActor();
+				System.out.println("INFO_CHILD ARRIVATO");
 				// System.out.println("Sto settando il childActor a: " + msg.getChildActor());
 				// this.serverActor.tell(new SimpleMessage("Prova di invio di un simplemessage da ControlPanelActor a ServerActor", Type.INFO), serverActor);
 				break;
