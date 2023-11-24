@@ -339,7 +339,11 @@ public class ServerActor extends AbstractActor {
                 this.userInputActor.tell(new SimpleMessage(Room.KITCHEN, this.kitchenCurrentTemperature, this.kitchenCurrentConsumption, this.kitchenHVACOn, Type.INPUT_REACHED_TEMPERATURE), self());
             }
             else{
-                this.kitchenHVACOn = true;
+                if(this.kitchenDesiredTemperature == this.kitchenInitialTemperature)
+                    this.kitchenHVACOn = false;
+                else
+                    this.kitchenHVACOn = true;
+
                 this.kitchenSupervisorActor.tell(new SimpleMessage(kitchenDesiredTemperature, Type.DESIRED_TEMPERATURE, Room.KITCHEN), self());
             }
         }
@@ -362,7 +366,11 @@ public class ServerActor extends AbstractActor {
                 this.userInputActor.tell(new SimpleMessage(Room.BEDROOM, this.bedroomCurrentTemperature, this.bedroomCurrentConsumption, this.bedroomHVACOn, Type.INPUT_REACHED_TEMPERATURE), self());
             }
             else{
-                this.bedroomHVACOn = true;
+                if(this.bedroomDesiredTemperature == this.bedroomInitialTemperature)
+                    this.bedroomHVACOn = false;
+                else
+                    this.bedroomHVACOn = true;
+                    
                 this.bedroomSupervisorActor.tell(new SimpleMessage(bedroomDesiredTemperature, Type.DESIRED_TEMPERATURE, Room.BEDROOM), self());
             }
         }
