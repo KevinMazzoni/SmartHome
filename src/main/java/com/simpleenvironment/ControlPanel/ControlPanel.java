@@ -30,6 +30,7 @@ public class ControlPanel {
         final ActorSystem system = ActorSystem.create("ServerSystem", config);
         
         ActorRef server;
+        ActorRef userInputActor;
 
         //Timeout attesa
         scala.concurrent.duration.Duration timeout = scala.concurrent.duration.Duration.create(5, SECONDS);
@@ -42,15 +43,28 @@ public class ControlPanel {
             //Creo ServerActor nel contesto di ControlPanel, così facendo ControlPanel supervisiona il ServerActor
             scala.concurrent.Future<Object> waitingForServerActor = ask(controlPanelActor, Props.create(ServerActor.class), 5000);
             server = (ActorRef) waitingForServerActor.result(timeout, null);
+
+            //Creo UserInputActor nel contesto di ControlPanel, così facendo ControlPanel supervisiona UserInputActor
+            scala.concurrent.Future<Object> waitingForUserInputActor = ask(controlPanelActor, Props.create(UserInputActor.class), 5000);
+            userInputActor = (ActorRef) waitingForUserInputActor.result(timeout, null);
             
             //Informo il ControlPanelActor di suo figlio ServerActor
             controlPanelActor.tell(new SimpleMessage(server, Type.INFO_CHILD, Appliance.SERVER), ActorRef.noSender());
+
+            //Informo il ControlPanelActor di suo figlio UserInputActor
+            controlPanelActor.tell(new SimpleMessage(userInputActor, Type.INFO_CHILD, Appliance.USER_INPUT), ActorRef.noSender());
 
             //Informo il ServerActor dell'ActorSystem
             server.tell(new SimpleMessage(system, Type.INFO_ACTOR_SYSTEM), ActorRef.noSender());
 
             //Informo il ServerActor di suo padre ControlPanelActor
             server.tell(new SimpleMessage(controlPanelActor, Type.INFO_CONTROLPANEL, Appliance.SERVER), ActorRef.noSender());
+
+            //Informo il ServerActor di UserInputActor
+            server.tell(new SimpleMessage(userInputActor, Type.INFO_USER_INPUT, Appliance.USER_INPUT), ActorRef.noSender());
+
+            //Informo UserInputActor di ServerActor
+            userInputActor.tell(new SimpleMessage(server, Type.INFO_SERVER, Appliance.SERVER), ActorRef.noSender());
 
             server.tell(new SimpleMessage("START", Type.START), ActorRef.noSender());
 

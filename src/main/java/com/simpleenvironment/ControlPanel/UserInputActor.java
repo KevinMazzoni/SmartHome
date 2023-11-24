@@ -7,10 +7,12 @@ import com.simpleenvironment.Messages.SimpleMessage;
 import com.simpleenvironment.Messages.Type;
 
 import akka.actor.AbstractActor;
+import akka.actor.ActorRef;
 import akka.actor.Props;
 
 public class UserInputActor extends AbstractActor {
 
+    private ActorRef serverActor;
     Scanner scanner = new Scanner(System.in);
 
     @Override
@@ -21,27 +23,30 @@ public class UserInputActor extends AbstractActor {
     }
 
     private void handleUserInput(SimpleMessage msg) {
+        if(msg.getType().equals(Type.INFO_SERVER)){
+            serverActor = msg.getSiblingActor();
+        }
         if(msg.getType().equals(Type.INPUT_ENVIRONMENT)){
             // System.out.println("Ricevuto Type.INPUT");
             int choice = showCli(msg.getEnergyConsumption());
-            context().parent().tell(new SimpleMessage(choice, Type.INPUT_ENVIRONMENT), self());
+            serverActor.tell(new SimpleMessage(choice, Type.INPUT_ENVIRONMENT), self());
         }
         if(msg.getType().equals(Type.INPUT_HVAC)){
             boolean choice = inputHVAC();
             // System.out.println("Choicein UserInpiutActor: " + choice);
-            context().parent().tell(new SimpleMessage(choice, Type.INPUT_HVAC, msg.getRoom()), self());
+            serverActor.tell(new SimpleMessage(choice, Type.INPUT_HVAC, msg.getRoom()), self());
         }
         if(msg.getType().equals(Type.INPUT_TEMPERATURE)){
             int desiredTemperature = inputTemperature();
-            context().parent().tell(new SimpleMessage(msg.getResettingChoice(), desiredTemperature, Type.INPUT_TEMPERATURE, msg.getRoom()), self());
+            serverActor.tell(new SimpleMessage(msg.getResettingChoice(), desiredTemperature, Type.INPUT_TEMPERATURE, msg.getRoom()), self());
         }
         if(msg.getType().equals(Type.INPUT_REACHED_TEMPERATURE)){
             int choice = inputReachedTemperature(msg);
-            context().parent().tell(new SimpleMessage(choice, Type.INPUT_REACHED_TEMPERATURE, msg.getRoom()), self());
+            serverActor.tell(new SimpleMessage(choice, Type.INPUT_REACHED_TEMPERATURE, msg.getRoom()), self());
         }
         if(msg.getType().equals(Type.INPUT_CONTINUE)){
             String choice = inputContinue();
-            context().parent().tell(new SimpleMessage(choice, Type.INPUT_CONTINUE, msg.getRoom()), self());
+            serverActor.tell(new SimpleMessage(choice, Type.INPUT_CONTINUE, msg.getRoom()), self());
         }
     }
 

@@ -73,7 +73,7 @@ public class ServerActor extends AbstractActor {
     @Override
     public void preStart() throws Exception {
         // Crea e avvia l'attore UserInputActor
-        userInputActor = getContext().actorOf(UserInputActor.props(), "userInputActor");
+        // userInputActor = getContext().actorOf(UserInputActor.props(), "userInputActor");
     }
 
     @Override
@@ -97,11 +97,13 @@ public class ServerActor extends AbstractActor {
 
     void onSimpleMessage(SimpleMessage msg) throws Exception {
         Type messageType = msg.getType();
-        System.out.println("MEssage type: " + messageType);
+        // System.out.println("MEssage type: " + messageType);
         if(msg.getType().equals(Type.INFO_ACTOR_SYSTEM))
             this.system = msg.getActorSystem();
         if(msg.getType().equals(Type.INFO_CONTROLPANEL))
             this.controlPanelActor = msg.getControlPanelRef();
+        if(msg.getType().equals(Type.INFO_USER_INPUT))
+            this.userInputActor = msg.getSiblingActor();
         if(msg.getType().equals(Type.DESIRED_TEMPERATURE)){
             if(msg.getRoom().equals(Room.KITCHEN))
                 this.kitchenDesiredTemperature = msg.getDesiredTemperature();

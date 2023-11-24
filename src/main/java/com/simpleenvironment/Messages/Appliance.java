@@ -7,6 +7,7 @@ public enum Appliance {
     KITCHEN_SUPERVISOR,
     BEDROOM_SUPERVISOR,
     LIVINGROOM_SUPERVISOR,
-    TV
-    /*Altri*/
+    TV,
+    USER_INPUT
+    /*Altri*/ 
 };

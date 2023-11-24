@@ -2,6 +2,7 @@ package com.simpleenvironment.ControlPanel;
 
 import java.time.Duration;
 
+import com.simpleenvironment.Messages.Appliance;
 import com.simpleenvironment.Messages.SimpleMessage;
 import com.simpleenvironment.Messages.TemperatureMessage;
 import com.simpleenvironment.Messages.Type;
@@ -25,6 +26,7 @@ import akka.japi.pf.DeciderBuilder;
 public class ControlPanelActor extends AbstractActor {
 
 	private ActorRef serverActor;
+	private ActorRef userInputActor;
 
 	private int kitchenCurrentTemperature;
 	private int bedroomCurrentTemperature;
@@ -146,7 +148,10 @@ public class ControlPanelActor extends AbstractActor {
 				this.serverActor.tell(msg, self());
 				break;
 			case INFO_CHILD:
-				this.serverActor = msg.getChildActor();
+				if(msg.getAppliance().equals(Appliance.SERVER))
+					this.serverActor = msg.getChildActor();
+				if(msg.getAppliance().equals(Appliance.USER_INPUT))
+					this.userInputActor = msg.getChildActor();
 				// System.out.println("INFO_CHILD ARRIVATO");
 				// System.out.println("Sto settando il childActor a: " + msg.getChildActor());
 				// this.serverActor.tell(new SimpleMessage("Prova di invio di un simplemessage da ControlPanelActor a ServerActor", Type.INFO), serverActor);
