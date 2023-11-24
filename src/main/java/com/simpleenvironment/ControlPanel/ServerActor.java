@@ -256,13 +256,14 @@ public class ServerActor extends AbstractActor {
             start();
         }
         
-        if(environment == KITCHEN){
+        if(environment == KITCHEN && this.kitchenRunning){
+            System.out.println("Entrato in environment == KITCHEN && this.kitchenRunning!!!");
             this.workingOnKitchen = true;
             kitchenSupervisorActor = system.actorSelection("akka://ServerSystem@127.0.0.1:2553/user/KitchenSupervisorActor");
             kitchenSupervisorActor.tell(new SimpleMessage("INFO_TEMPERATURE", Type.INFO_TEMPERATURE), ActorRef.noSender());
         }
 
-        if(environment == BEDROOM){
+        if(environment == BEDROOM && this.bedroomRunning){
             this.workingOnBedroom = true;
             bedroomSupervisorActor = system.actorSelection("akka://ServerSystem@127.0.0.1:2554/user/BedroomSupervisorActor");
             bedroomSupervisorActor.tell(new SimpleMessage("INFO_TEMPERATURE", Type.INFO_TEMPERATURE), ActorRef.noSender());
@@ -279,6 +280,8 @@ public class ServerActor extends AbstractActor {
         boolean wantsAirConditioning = msg.getHVACChoice();
 
         if(msg.getRoom().equals(Room.KITCHEN)){
+            if(!this.kitchenRunning)
+                return;
             // System.out.println("STO PER FARE LA SCELTA!");
             if(wantsAirConditioning){
                 kitchenHVACOn = true;
@@ -292,6 +295,8 @@ public class ServerActor extends AbstractActor {
             }
         }
         else if(msg.getRoom().equals(Room.BEDROOM)){
+            if(!this.bedroomRunning)
+                return;
             if(wantsAirConditioning){
                 bedroomHVACOn = true;
                 this.bedroomHVACOffSelectable = true;
@@ -308,6 +313,8 @@ public class ServerActor extends AbstractActor {
     private void inputTemperatureReceived(SimpleMessage msg){
         //TODO
         if(msg.getRoom().equals(Room.KITCHEN)){
+            if(!this.kitchenRunning)
+                return;
             if(msg.getResettingChoice())
                 this.kitchenSupervisorActor.tell(new SimpleMessage(kitchenDesiredTemperature, Type.DESIRED_TEMPERATURE, Room.KITCHEN), self());
             this.kitchenDesiredTemperature = msg.getDesiredTemperature();
@@ -316,6 +323,8 @@ public class ServerActor extends AbstractActor {
             this.kitchenSupervisorActor.tell(new SimpleMessage(kitchenDesiredTemperature, Type.DESIRED_TEMPERATURE, Room.KITCHEN), self());
         }
         else if(msg.getRoom().equals(Room.BEDROOM)){
+            if(!this.bedroomRunning)
+                return;
             if(msg.getResettingChoice())
                 this.bedroomSupervisorActor.tell(new SimpleMessage(bedroomDesiredTemperature, Type.DESIRED_TEMPERATURE, Room.BEDROOM), self());
             this.bedroomDesiredTemperature = msg.getDesiredTemperature();
@@ -328,6 +337,8 @@ public class ServerActor extends AbstractActor {
 
     private void inputReachedTemperatureReceived(SimpleMessage msg){
         if(msg.getRoom().equals(Room.KITCHEN)){
+            if(!this.kitchenRunning)
+                return;
             switch(msg.getChoice()){
                 case 1:
                     this.userInputActor.tell(new SimpleMessage("INPUT_CONTINUE", Type.INPUT_CONTINUE, Room.KITCHEN), self());
@@ -353,6 +364,8 @@ public class ServerActor extends AbstractActor {
             }
         }
         else if(msg.getRoom().equals(Room.BEDROOM)){
+            if(!this.bedroomRunning)
+                return;
             switch(msg.getChoice()){
                 case 1:
                     this.userInputActor.tell(new SimpleMessage("INPUT_CONTINUE", Type.INPUT_CONTINUE, Room.BEDROOM), self());
@@ -381,6 +394,8 @@ public class ServerActor extends AbstractActor {
 
     private void inputContinueReceived(SimpleMessage msg){
         if(msg.getRoom().equals(Room.KITCHEN)){
+            if(!this.kitchenRunning)
+                return;
             if(msg.getStringChoice().equalsIgnoreCase("y")){
                 // kitchenHVACOn = false;
                 this.workingOnKitchen = false;
@@ -393,6 +408,8 @@ public class ServerActor extends AbstractActor {
             }
         }
         else if(msg.getRoom().equals(Room.BEDROOM)){
+            if(!this.bedroomRunning)
+                return;
             if(msg.getStringChoice().equalsIgnoreCase("y")){
                 // kitchenHVACOn = false;
                 this.workingOnBedroom = false;
