@@ -46,6 +46,11 @@ public class UserInputActor extends AbstractActor {
     }
 
     private int showCli(int energyConsumption) {
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         System.out.println("\nCONSUMO TOTALE ATTUALE: \u001B[33m" + energyConsumption + " W\u001B[0m\n");
         System.out.println("Scegli la stanza: \n1. Cucina\n2. Camera da letto\n3. Salotto");
         int choice = scanner.nextInt();
@@ -57,7 +62,7 @@ public class UserInputActor extends AbstractActor {
         boolean choice;
         System.out.print("\nVuoi accendere il condizionatore? (y/n)\t");
         String answer = scanner.next();
-        // System.out.println("ANSWERRR: " + answer);
+        System.out.println();
         choice = (answer.equalsIgnoreCase("y")) ? true : false;
         return choice;
     }
@@ -91,6 +96,7 @@ public class UserInputActor extends AbstractActor {
             int choice = scanner.nextInt();
             System.out.print("\nTemperatura camera da letto: " + msg.getCurrentTemperature() + "° C");
             System.out.println("\tConsumo elettrico camera da letto: " + msg.getCurrentConsumption() + " W");
+            System.out.println();
             return choice;
         }
         return 0;
@@ -99,6 +105,7 @@ public class UserInputActor extends AbstractActor {
     private String inputContinue() {
         System.out.print("Vuoi proseguire con un altro ambiente? (y/n)\t");
         String choiceString = scanner.next();
+        System.out.println();
         return choiceString;
     }
 

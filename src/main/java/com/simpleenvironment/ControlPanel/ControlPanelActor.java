@@ -81,7 +81,7 @@ public class ControlPanelActor extends AbstractActor {
                 	})
 					.match(CurrentClusterState.class, state -> {
                     	// Ricevi una notifica sullo stato attuale del cluster
-						System.out.println("Current members: " + state.getMembers());
+						// System.out.println("Current members: " + state.getMembers());
 					})
 					.match(MemberUp.class, memberUp -> {
 						// Ricevi una notifica quando un membro si unisce al cluster
@@ -90,7 +90,7 @@ public class ControlPanelActor extends AbstractActor {
 					})
 					.match(MemberRemoved.class, memberRemoved -> {
 						// Ricevi una notifica quando un membro viene rimosso dal cluster
-						System.out.println("Member is Removed: " + memberRemoved.member().address());
+						// System.out.println("Member is Removed: " + memberRemoved.member().address());
 					})
 					.match(MemberEvent.class, memberEvent -> {
 						// Altri tipi di eventi relativi ai membri del cluster possono essere gestiti qui
@@ -98,34 +98,34 @@ public class ControlPanelActor extends AbstractActor {
 							// System.out.println("Member is Exited: " + ((MemberExited) memberEvent).member());
 							switch(((MemberExited) memberEvent).member().address().toString()){
 								case "akka://ServerSystem@127.0.0.1:2553":
-									System.out.println("Kitchen exiting");
+									// System.out.println("Kitchen exiting");
 									this.kitchenRunning = false;
 									this.serverActor.tell(new SimpleMessage("Kitchen exiting", Type.KITCHEN_OFF), self());
 									break;
 								case "akka://ServerSystem@127.0.0.1:2554":
-									System.out.println("Bedroom exiting");
+									// System.out.println("Bedroom exiting");
 									this.bedroomRunning = false;
 									this.serverActor.tell(new SimpleMessage("Bedroom exiting", Type.BEDROOM_OFF), self());
 									break;
 								default:
-									System.out.println("NOT_RECOGNIZED up and running");
+									// System.out.println("NOT_RECOGNIZED up and running");
 									break;
 							}
 						} else if (memberEvent instanceof MemberJoined) {
 							// System.out.println("Member Joined: " + ((MemberJoined) memberEvent).member());
 							switch(((MemberJoined) memberEvent).member().address().toString()){
 								case "akka://ServerSystem@127.0.0.1:2553":
-									System.out.println("Kitchen up and running");
+									// System.out.println("Kitchen up and running");
 									this.kitchenRunning = true;
 									this.serverActor.tell(new SimpleMessage("Kitchen active and running", Type.KITCHEN_ON), self());
 									break;
 								case "akka://ServerSystem@127.0.0.1:2554":
-									System.out.println("Bedroom up and running");
+									// System.out.println("Bedroom up and running");
 									this.bedroomRunning = true;
 									this.serverActor.tell(new SimpleMessage("Bedroom active and running", Type.BEDROOM_ON), self());
 									break;
 								default:
-									System.out.println("NOT_RECOGNIZED up and running");
+									// System.out.println("NOT_RECOGNIZED up and running");
 									break;
 							}
 						} else if (memberEvent instanceof MemberEvent) {
@@ -147,7 +147,7 @@ public class ControlPanelActor extends AbstractActor {
 				break;
 			case INFO_CHILD:
 				this.serverActor = msg.getChildActor();
-				System.out.println("INFO_CHILD ARRIVATO");
+				// System.out.println("INFO_CHILD ARRIVATO");
 				// System.out.println("Sto settando il childActor a: " + msg.getChildActor());
 				// this.serverActor.tell(new SimpleMessage("Prova di invio di un simplemessage da ControlPanelActor a ServerActor", Type.INFO), serverActor);
 				break;

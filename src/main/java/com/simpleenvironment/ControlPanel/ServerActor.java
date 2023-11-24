@@ -99,7 +99,7 @@ public class ServerActor extends AbstractActor {
 
     void onSimpleMessage(SimpleMessage msg) throws Exception {
         Type messageType = msg.getType();
-        System.out.println("MEssage type: " + messageType);
+        // System.out.println("MEssage type: " + messageType);
         if(msg.getType().equals(Type.INFO_ACTOR_SYSTEM))
             this.system = msg.getActorSystem();
         if(msg.getType().equals(Type.INFO_CONTROLPANEL))
@@ -127,33 +127,33 @@ public class ServerActor extends AbstractActor {
         if(msg.getType().equals(Type.INPUT_CONTINUE))
             inputContinueReceived(msg);
         if(msg.getType().equals(Type.KITCHEN_ON)){
-            System.out.println("Kitchen is ON!!!");
+            // System.out.println("Kitchen is ON!!!");
             this.kitchenRunning = true;
         }
         if(msg.getType().equals(Type.BEDROOM_ON)){
-            System.out.println("Bedroom is ON!!!");
+            // System.out.println("Bedroom is ON!!!");
             this.bedroomRunning = true;
         }
         if(msg.getType().equals(Type.KITCHEN_OFF)){
-            System.out.println("Kitchen is OFF!!!");
+            // System.out.println("Kitchen is OFF!!!");
             this.kitchenRunning = false;
             this.kitchenCurrentConsumption = 0;
             this.kitchenHVACOn = false;
             this.kitchenEnvironment = true;
             if(workingOnKitchen){
-                System.out.println("\u001B[31mLa cucina ha smesso improvvisamente di funzionare! Prova con un altro ambiente\u001B[0m");
+                // System.out.println("\u001B[31mLa cucina ha smesso improvvisamente di funzionare! Prova con un altro ambiente\u001B[0m");
                 this.workingOnKitchen = false;
                 start();
             }
         }
         if(msg.getType().equals(Type.BEDROOM_OFF)){
-            System.out.println("Bedroom is OFF!!!");
+            // System.out.println("Bedroom is OFF!!!");
             this.bedroomRunning = false;
             this.bedroomCurrentConsumption = 0;
             this.bedroomHVACOn = false;
             this.bedroomEnvironment = true;
             if(workingOnBedroom){
-                System.out.println("\u001B[31mLa camera da letto ha smesso improvvisamente di funzionare! Prova con un altro ambiente\u001B[0m");
+                // System.out.println("\u001B[31mLa camera da letto ha smesso improvvisamente di funzionare! Prova con un altro ambiente\u001B[0m");
                 this.workingOnBedroom = false;
                 start();
             }
@@ -257,7 +257,6 @@ public class ServerActor extends AbstractActor {
         }
         
         if(environment == KITCHEN && this.kitchenRunning){
-            System.out.println("Entrato in environment == KITCHEN && this.kitchenRunning!!!");
             this.workingOnKitchen = true;
             kitchenSupervisorActor = system.actorSelection("akka://ServerSystem@127.0.0.1:2553/user/KitchenSupervisorActor");
             kitchenSupervisorActor.tell(new SimpleMessage("INFO_TEMPERATURE", Type.INFO_TEMPERATURE), ActorRef.noSender());
@@ -280,8 +279,10 @@ public class ServerActor extends AbstractActor {
         boolean wantsAirConditioning = msg.getHVACChoice();
 
         if(msg.getRoom().equals(Room.KITCHEN)){
-            if(!this.kitchenRunning)
+            if(!this.kitchenRunning){
+                System.out.println("\u001B[31mLa cucina ha smesso improvvisamente di funzionare! Prova con un altro ambiente\u001B[0m");
                 return;
+            }
             // System.out.println("STO PER FARE LA SCELTA!");
             if(wantsAirConditioning){
                 kitchenHVACOn = true;
@@ -295,8 +296,10 @@ public class ServerActor extends AbstractActor {
             }
         }
         else if(msg.getRoom().equals(Room.BEDROOM)){
-            if(!this.bedroomRunning)
+            if(!this.bedroomRunning){
+                System.out.println("\u001B[31mLa camera da letto ha smesso improvvisamente di funzionare! Prova con un altro ambiente\u001B[0m");
                 return;
+            }
             if(wantsAirConditioning){
                 bedroomHVACOn = true;
                 this.bedroomHVACOffSelectable = true;
@@ -313,8 +316,10 @@ public class ServerActor extends AbstractActor {
     private void inputTemperatureReceived(SimpleMessage msg){
         //TODO
         if(msg.getRoom().equals(Room.KITCHEN)){
-            if(!this.kitchenRunning)
+            if(!this.kitchenRunning){
+                System.out.println("\u001B[31mLa cucina ha smesso improvvisamente di funzionare! Prova con un altro ambiente\u001B[0m");
                 return;
+            }
             if(msg.getResettingChoice())
                 this.kitchenSupervisorActor.tell(new SimpleMessage(kitchenDesiredTemperature, Type.DESIRED_TEMPERATURE, Room.KITCHEN), self());
             this.kitchenDesiredTemperature = msg.getDesiredTemperature();
@@ -323,8 +328,10 @@ public class ServerActor extends AbstractActor {
             this.kitchenSupervisorActor.tell(new SimpleMessage(kitchenDesiredTemperature, Type.DESIRED_TEMPERATURE, Room.KITCHEN), self());
         }
         else if(msg.getRoom().equals(Room.BEDROOM)){
-            if(!this.bedroomRunning)
+            if(!this.bedroomRunning){
+                System.out.println("\u001B[31mLa camera da letto ha smesso improvvisamente di funzionare! Prova con un altro ambiente\u001B[0m");
                 return;
+            }
             if(msg.getResettingChoice())
                 this.bedroomSupervisorActor.tell(new SimpleMessage(bedroomDesiredTemperature, Type.DESIRED_TEMPERATURE, Room.BEDROOM), self());
             this.bedroomDesiredTemperature = msg.getDesiredTemperature();
@@ -337,8 +344,10 @@ public class ServerActor extends AbstractActor {
 
     private void inputReachedTemperatureReceived(SimpleMessage msg){
         if(msg.getRoom().equals(Room.KITCHEN)){
-            if(!this.kitchenRunning)
+            if(!this.kitchenRunning){
+                System.out.println("\u001B[31mLa cucina ha smesso improvvisamente di funzionare! Prova con un altro ambiente\u001B[0m");
                 return;
+            }
             switch(msg.getChoice()){
                 case 1:
                     this.userInputActor.tell(new SimpleMessage("INPUT_CONTINUE", Type.INPUT_CONTINUE, Room.KITCHEN), self());
@@ -364,8 +373,10 @@ public class ServerActor extends AbstractActor {
             }
         }
         else if(msg.getRoom().equals(Room.BEDROOM)){
-            if(!this.bedroomRunning)
+            if(!this.bedroomRunning){
+                System.out.println("\u001B[31mLa camera da letto ha smesso improvvisamente di funzionare! Prova con un altro ambiente\u001B[0m");
                 return;
+            }
             switch(msg.getChoice()){
                 case 1:
                     this.userInputActor.tell(new SimpleMessage("INPUT_CONTINUE", Type.INPUT_CONTINUE, Room.BEDROOM), self());
@@ -373,7 +384,6 @@ public class ServerActor extends AbstractActor {
                 case 2:
                     if(this.bedroomHVACOn){
                         this.bedroomHVACOn = false;
-                        System.out.println("Bedroom initial temperature: " + this.bedroomInitialTemperature);
                         this.bedroomDesiredTemperature = bedroomInitialTemperature;
                         this.bedroomSupervisorActor.tell(new SimpleMessage(this.bedroomInitialTemperature, Type.STOP_HVAC, Room.BEDROOM), self());
                     }
@@ -394,8 +404,10 @@ public class ServerActor extends AbstractActor {
 
     private void inputContinueReceived(SimpleMessage msg){
         if(msg.getRoom().equals(Room.KITCHEN)){
-            if(!this.kitchenRunning)
+            if(!this.kitchenRunning){
+                System.out.println("\u001B[31mLa cucina ha smesso improvvisamente di funzionare! Prova con un altro ambiente\u001B[0m");
                 return;
+            }
             if(msg.getStringChoice().equalsIgnoreCase("y")){
                 // kitchenHVACOn = false;
                 this.workingOnKitchen = false;
@@ -408,8 +420,10 @@ public class ServerActor extends AbstractActor {
             }
         }
         else if(msg.getRoom().equals(Room.BEDROOM)){
-            if(!this.bedroomRunning)
+            if(!this.bedroomRunning){
+                System.out.println("\u001B[31mLa camera da letto ha smesso improvvisamente di funzionare! Prova con un altro ambiente\u001B[0m");
                 return;
+            }
             if(msg.getStringChoice().equalsIgnoreCase("y")){
                 // kitchenHVACOn = false;
                 this.workingOnBedroom = false;
