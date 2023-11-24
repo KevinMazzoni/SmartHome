@@ -97,7 +97,7 @@ public class ServerActor extends AbstractActor {
 
     void onSimpleMessage(SimpleMessage msg) throws Exception {
         Type messageType = msg.getType();
-        // System.out.println("MEssage type: " + messageType);
+        System.out.println("MEssage type: " + messageType);
         if(msg.getType().equals(Type.INFO_ACTOR_SYSTEM))
             this.system = msg.getActorSystem();
         if(msg.getType().equals(Type.INFO_CONTROLPANEL))
@@ -323,7 +323,23 @@ public class ServerActor extends AbstractActor {
             this.kitchenDesiredTemperature = msg.getDesiredTemperature();
             
             //Dubbio questo sotto
-            this.kitchenSupervisorActor.tell(new SimpleMessage(kitchenDesiredTemperature, Type.DESIRED_TEMPERATURE, Room.KITCHEN), self());
+            if(this.kitchenDesiredTemperature == this.kitchenCurrentTemperature){
+                //Gestisco caso limite in cui venga impostata una temperatura al climatizzatore == temperatura iniziale 
+                // if(kitchenHVACOn && this.kitchenInitialTemperature == this.kitchenDesiredTemperature)
+                //     kitchenHVACOn = false;
+                // else if (this.kitchenInitialTemperature == this.kitchenDesiredTemperature)
+                //     kitchenHVACOn = true;
+                if(this.kitchenInitialTemperature == this.kitchenDesiredTemperature)
+                    kitchenHVACOn = false;
+                else
+                    kitchenHVACOn = true;
+
+                this.userInputActor.tell(new SimpleMessage(Room.KITCHEN, this.kitchenCurrentTemperature, this.kitchenCurrentConsumption, this.kitchenHVACOn, Type.INPUT_REACHED_TEMPERATURE), self());
+            }
+            else{
+                this.kitchenHVACOn = true;
+                this.kitchenSupervisorActor.tell(new SimpleMessage(kitchenDesiredTemperature, Type.DESIRED_TEMPERATURE, Room.KITCHEN), self());
+            }
         }
         else if(msg.getRoom().equals(Room.BEDROOM)){
             if(!this.bedroomRunning){
@@ -335,7 +351,18 @@ public class ServerActor extends AbstractActor {
             this.bedroomDesiredTemperature = msg.getDesiredTemperature();
             
             //Dubbio questo sotto
-            this.bedroomSupervisorActor.tell(new SimpleMessage(bedroomDesiredTemperature, Type.DESIRED_TEMPERATURE, Room.BEDROOM), self());
+            if(this.bedroomDesiredTemperature == this.bedroomCurrentTemperature){
+                if((this.bedroomInitialTemperature == this.bedroomDesiredTemperature))
+                    this.bedroomHVACOn = false;
+                else
+                    this.bedroomHVACOn = true;
+
+                this.userInputActor.tell(new SimpleMessage(Room.BEDROOM, this.bedroomCurrentTemperature, this.bedroomCurrentConsumption, this.bedroomHVACOn, Type.INPUT_REACHED_TEMPERATURE), self());
+            }
+            else{
+                this.bedroomHVACOn = true;
+                this.bedroomSupervisorActor.tell(new SimpleMessage(bedroomDesiredTemperature, Type.DESIRED_TEMPERATURE, Room.BEDROOM), self());
+            }
         }
         // return 0;
     }
@@ -362,7 +389,7 @@ public class ServerActor extends AbstractActor {
                     }
                     break;
                 case 3:
-                    this.kitchenHVACOn = true;
+                    // this.kitchenHVACOn = true;
                     setTemperature(RESET, Room.KITCHEN);
                     break;
                 default:
@@ -390,7 +417,7 @@ public class ServerActor extends AbstractActor {
                     }
                     break;
                 case 3:
-                    this.bedroomHVACOn = true;
+                    // this.bedroomHVACOn = true;
                     setTemperature(RESET, Room.BEDROOM);
                     break;
                 default:
