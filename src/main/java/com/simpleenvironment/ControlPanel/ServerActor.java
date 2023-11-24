@@ -15,7 +15,6 @@ public class ServerActor extends AbstractActor {
 
     private static final int KITCHEN = 1;
     private static final int BEDROOM = 2;
-    private static final int LIVINGROOM = 3;
 
     private boolean kitchenHVACOn;
     private boolean kitchenHVACOffSelectable;
@@ -53,7 +52,6 @@ public class ServerActor extends AbstractActor {
     private ActorSelection controlPanelActor;
     private ActorSelection kitchenSupervisorActor;
     private ActorSelection bedroomSupervisorActor;
-    private ActorSelection livingroomSupervisorActor;
 
     private static final boolean RESET = true;
     private static final boolean SET = false;
@@ -268,9 +266,9 @@ public class ServerActor extends AbstractActor {
             bedroomSupervisorActor.tell(new SimpleMessage("INFO_TEMPERATURE", Type.INFO_TEMPERATURE), ActorRef.noSender());
         }
 
-        if(environment == LIVINGROOM){
-            livingroomSupervisorActor = system.actorSelection("akka://ServerSystem@127.0.0.1:2555/user/LivingroomSupervisorActor");
-            livingroomSupervisorActor.tell(new SimpleMessage("INFO_CONSUMPTION_TELEVISION", Type.INFO_CONSUMPTION), ActorRef.noSender());
+        if(environment != KITCHEN && environment != BEDROOM){
+            System.out.println("Seleziona un ambiente valido per favore.");
+            start();
         }
     }
 
@@ -364,7 +362,6 @@ public class ServerActor extends AbstractActor {
                     }
                     break;
                 case 3:
-                    System.out.println("Entrato case 3");
                     this.kitchenHVACOn = true;
                     setTemperature(RESET, Room.KITCHEN);
                     break;
