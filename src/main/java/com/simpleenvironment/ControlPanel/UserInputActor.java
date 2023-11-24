@@ -1,15 +1,6 @@
 package com.simpleenvironment.ControlPanel;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Scanner;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import com.simpleenvironment.Messages.Room;
 import com.simpleenvironment.Messages.SimpleMessage;
@@ -44,15 +35,14 @@ public class UserInputActor extends AbstractActor {
             int desiredTemperature = inputTemperature();
             context().parent().tell(new SimpleMessage(msg.getResettingChoice(), desiredTemperature, Type.INPUT_TEMPERATURE, msg.getRoom()), self());
         }
-        // // Gestisci l'input utente e inoltra il messaggio all'attore appropriato
-        // if (userInput.equalsIgnoreCase("kitchen")) {
-        //     // Inoltra il messaggio a KitchenActor
-        //     context().parent().tell(new Type.KITCHEN_OFF(), self());
-        // } else if (userInput.equalsIgnoreCase("bedroom")) {
-        //     // Inoltra il messaggio a BedroomActor
-        //     // context().parent().tell(new Type.BEDROOM_OFF(), self());
-        // }
-        // // Altri casi di gestione dell'input utente
+        if(msg.getType().equals(Type.INPUT_REACHED_TEMPERATURE)){
+            int choice = inputReachedTemperature(msg);
+            context().parent().tell(new SimpleMessage(choice, Type.INPUT_REACHED_TEMPERATURE, msg.getRoom()), self());
+        }
+        if(msg.getType().equals(Type.INPUT_CONTINUE)){
+            String choice = inputContinue();
+            context().parent().tell(new SimpleMessage(choice, Type.INPUT_CONTINUE, msg.getRoom()), self());
+        }
     }
 
     private int showCli(int energyConsumption) {
@@ -78,6 +68,38 @@ public class UserInputActor extends AbstractActor {
         int choice = scanner.nextInt();
         System.out.println("\u001B[0m");
         return choice;
+    }
+
+    private int inputReachedTemperature(SimpleMessage msg) {
+        if(msg.getRoom().equals(Room.KITCHEN)){
+            System.out.println("\nL'ambiente cucina ha raggiunto la temperatura di \u001B[32m" + msg.getCurrentTemperature() + "° C\u001B[0m. Cosa desideri fare?");
+            if(msg.getHVACOn())
+                System.out.println("1 -> mantenere la temperatura.\n2 -> spegnere il climatizzatore\n3 -> impostare una temperatura diversa");
+            else
+                System.out.println("1 -> mantenere la temperatura.\n3 -> impostare una temperatura diversa");
+            int choice = scanner.nextInt();
+            System.out.print("\nTemperatura cucina: " + msg.getCurrentTemperature() + "° C");
+            System.out.println("\tConsumo elettrico cucina: " + msg.getCurrentConsumption() + " W");
+            return choice;
+        }
+        else if(msg.getRoom().equals(Room.BEDROOM)){
+            System.out.println("\nL'ambiente camera da letto ha raggiunto la temperatura di \u001B[32m" + msg.getCurrentTemperature() + "° C\u001B[0m. Cosa desideri fare?");
+            if(msg.getHVACOn())
+                System.out.println("1 -> mantenere la temperatura.\n2 -> spegnere il climatizzatore\n3 -> impostare una temperatura diversa");
+            else
+                System.out.println("1 -> mantenere la temperatura.\n3 -> impostare una temperatura diversa");
+            int choice = scanner.nextInt();
+            System.out.print("\nTemperatura camera da letto: " + msg.getCurrentTemperature() + "° C");
+            System.out.println("\tConsumo elettrico camera da letto: " + msg.getCurrentConsumption() + " W");
+            return choice;
+        }
+        return 0;
+    }
+
+    private String inputContinue() {
+        System.out.print("Vuoi proseguire con un altro ambiente? (y/n)\t");
+        String choiceString = scanner.next();
+        return choiceString;
     }
 
     static Props props() {

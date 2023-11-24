@@ -22,6 +22,8 @@ public enum Type {
     BEDROOM_OFF,
     INPUT_ENVIRONMENT,
     INPUT_HVAC,
-    INPUT_TEMPERATURE
-    /*Altri*/
+    INPUT_TEMPERATURE,
+    INPUT_REACHED_TEMPERATURE,
+    INPUT_CONTINUE
+    /*Altri*/ 
 };

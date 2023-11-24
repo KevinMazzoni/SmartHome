@@ -11,6 +11,7 @@ public class SimpleMessage implements Serializable {
     private String message;
     private Type type;
     private int desiredTemperature;
+    private int currentConsumption;
     private boolean choice;
 
     private Room room;
@@ -25,6 +26,12 @@ public class SimpleMessage implements Serializable {
     public SimpleMessage(String message, Type type){
         this.message = message;
         this.type = type;
+    }
+
+    public SimpleMessage(String message, Type type, Room room){
+        this.message = message;
+        this.type = type;
+        this.room = room;
     }
 
     public SimpleMessage(ActorRef actorRef, Type type, Appliance appliance){
@@ -65,6 +72,14 @@ public class SimpleMessage implements Serializable {
         this.desiredTemperature = desiredTemperature;
         this.type = type;
         this.room = room;
+    }
+
+    public SimpleMessage(Room room, int kitchenCurrentTemperature, int kitchenCurrentConsumption, boolean kitchenHVACOn, Type type) {
+        this.room = room;
+        this.desiredTemperature = kitchenCurrentTemperature;
+        this.currentConsumption = kitchenCurrentConsumption;
+        this.choice = kitchenHVACOn;
+        this.type = type;
     }
 
     public String getMessage(){
@@ -124,6 +139,26 @@ public class SimpleMessage implements Serializable {
     }
 
     public boolean getResettingChoice(){
+        return this.choice;
+    }
+
+    public int getChoice(){
+        return this.desiredTemperature;
+    }
+
+    public String getStringChoice(){
+        return this.message;
+    }
+
+    public int getCurrentTemperature(){
+        return this.desiredTemperature;
+    }
+
+    public int getCurrentConsumption(){
+        return this.currentConsumption;
+    }
+
+    public boolean getHVACOn(){
         return this.choice;
     }
 }
